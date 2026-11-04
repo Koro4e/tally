@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 import PageHeader from "@/PageHeader";
 import Tabs from "@/ui/Tabs";
+import { correct as sfxCorrect, wrong as sfxWrong } from "@/lib/sfx";
 import {
   EXAM_CORE,
   LEVELS,
@@ -522,6 +523,7 @@ function Runde({
     const r = cur.gaps.map((g, i) => judge(values[i] ?? "", g));
     setRes(r);
     setChecked(true);
+    r.every((x) => x === "ok") ? sfxCorrect() : sfxWrong();
     window.clearTimeout(mascotTimer.current);
     setMascotMood(r.every((x) => x === "ok") ? "cheer" : "sad");
     mascotTimer.current = window.setTimeout(() => setMascotMood("idle"), 1600);

@@ -69,6 +69,10 @@ export function apply(): void {
   if (applied === v) return;
   applied = v;
   document.documentElement.dataset.theme = v;
+  /* цвет рамки мобильного браузера следует за темой */
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", v === "dark" ? "#14171C" : "#FBF5E9");
 }
 
 /** вызывается один раз из main.tsx до рендера */

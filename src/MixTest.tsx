@@ -17,6 +17,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
+import { correct as sfxCorrect, wrong as sfxWrong } from "@/lib/sfx";
 import { PATH, current, pNow, statusOf, type M } from "@/lib/mastery";
 import { SKILLS, type Skill } from "@/lib/skills";
 import { isCorrect } from "@/lib/check";
@@ -205,6 +206,7 @@ export default function MixTest({
     setOk(good);
     setChecked(true);
     if (good) setCorrect((c) => c + 1);
+    good ? sfxCorrect() : sfxWrong();
     /* запись в свой узел: один верный ответ приседает вероятность вверх,
        провал — вниз (закрытый узел уезжает в «пора повторить») */
     const pPrev = pNow(m0[cur.skill]);

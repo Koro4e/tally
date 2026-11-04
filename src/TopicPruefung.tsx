@@ -14,6 +14,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/utils/cn";
+import { correct as sfxCorrect, wrong as sfxWrong } from "@/lib/sfx";
 import type { Skill } from "@/lib/skills";
 import { isCorrect } from "@/lib/check";
 import MathText from "@/MathText";
@@ -159,6 +160,7 @@ export default function TopicPruefung({
     setOk(good);
     setChecked(true);
     if (good) setCorrect((c) => c + 1);
+    good ? sfxCorrect() : sfxWrong();
   };
 
   const advance = () => {

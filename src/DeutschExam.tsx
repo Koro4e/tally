@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/utils/cn";
 import PageHeader from "@/PageHeader";
+import { correct as sfxCorrect, wrong as sfxWrong } from "@/lib/sfx";
 import { LESEN, type LesenText } from "@/lib/de/exam-lesen";
 import { LUECK, type LueckText } from "@/lib/de/exam-lueck";
 import { SCHREIBEN, type SchreibenAufgabe } from "@/lib/de/exam-schreiben";
@@ -132,6 +133,7 @@ function LesenRun({
   const answer = (v: boolean) => {
     if (picked !== null) return;
     setPicked(v);
+    v === cur.ok ? sfxCorrect() : sfxWrong();
     if (v === cur.ok) setCorrect((c) => c + 1);
   };
 

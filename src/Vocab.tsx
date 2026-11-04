@@ -22,6 +22,7 @@ import { useState } from "react";
 import { cn } from "@/utils/cn";
 import PageHeader from "@/PageHeader";
 import Tabs from "@/ui/Tabs";
+import { correct as sfxCorrect, wrong as sfxWrong } from "@/lib/sfx";
 import { judge, norm } from "@/lib/de/gen";
 import type { Snap } from "@/lib/motivation";
 import {
@@ -283,6 +284,8 @@ export default function Vocab({
       const answer = cur.dir === "ru-de" ? cur.w.de : cur.w.ru;
       const verdict = judge(ses.value, [answer]);
       const ok = verdict === "ok";
+      /* серия слышна: чем дольше без ошибок, тем выше тон */
+      ok ? sfxCorrect(ses.combo + 1) : sfxWrong();
       const nextSt = recordV(st, cur.w, ok);
       setSt(nextSt);
       saveV(nextSt);

@@ -35,6 +35,7 @@ import { isCorrect, mmss } from "@/lib/check";
 import { specOf } from "@/lib/specs";
 import { byId } from "@/lib/skills";
 import { cn } from "@/utils/cn";
+import { wrong as sfxWrong, sparkle } from "@/lib/sfx";
 
 /* ------------------------------------------------------------------ план --- */
 
@@ -241,6 +242,8 @@ export default function Exam({
       parts,
     };
     setResult(r);
+    /* финал экзамена: половина баллов набрана — искры, нет — низкий сигнал */
+    if (r.pts * 2 >= r.max) sparkle(); else sfxWrong();
     pushExam(r);
     onFinish(r);
     // eslint-disable-next-line react-hooks/exhaustive-deps
