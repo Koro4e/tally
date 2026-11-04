@@ -1546,3 +1546,12 @@ OCR требует сервера → работает на localhost (и люб
 - Проверено живьём: 6x400→429 Retry-After:60; 413 JSON; 77 тестов, build чистый.
 - Коммиты: f10de6d (фронт), bee915d (бекенд), 6c65942 (банк 727 + handoff). Все на origin/main.
 - ВНИМАНИЕ: прод https://tally.koro4e.eu.cc НЕ обновился — Vercel CLI вылогинен, GitHub-хук деплоя не срабатывает (deployments пуст). Нужно: vercel login или новый токен vercel.com/account/tokens → потом npx vercel --prod. Промпт для сильной модели: PROMPT-DESIGN.md (фулл-визуал, анимации разрешены).
+
+(13) 04.11.2026 — Перенос макета сильной модели (волна 1)
+- Источник: C:/Users/Koro4/Downloads/TALLY — визуальный редизайн.html + TALLY_AGENT_SPEC.md (порядок работ). Логика не тронута, перенесён визуал.
+- index.css: @theme алиасится на живые токены (--bg/--sf/--sf2/--ln/--ink/--mu/--on/--gold/--blue/--bad); акцент = маскот: --a/--ad у data-pet, --acc выбирает тема, --ac2=acc 70%+чёрный, --as=acc 14%+sf; семейство green = алиас acc-системы; blued/goldd/badd/badl через color-mix; шрифты Onest (текст) + Unbounded (h1/.font-display); --ease/--spring/--d1..3; View Transition circle от клика (--x/--y); .jd — акцентная карточка; halo с сохранением нижней тени; keyframes mv/bob.
+- bg-white → bg-card (84 шт), border-2 border-line → 1px. text-on на акцентах.
+- App.tsx: субъекты ∑/Ä (Unbounded) в 2-col grid, нав-иконки stroke 1.75, карточка дней sf2 + крупное число, NextUp и Deutsch «Jetzt dran» = .jd, Tabs (скользящая пилюля, spring) для SubBar/уровней/темы, зигзаг-тропа (H=104, X=[0,50,0,-50], SVG-безье, бегущий пунктир 2 14), узлы 64/72 + 3px рамки + rev-контур + START-бейдж (bg-ink/text-bg, bob) + hover scale, маскот стоит у текущего узла (lg), cov у текущего узла скрыт (налезал), Today-пузырь sf2.
+- theme.ts/setTheme и store/setMascot принимают {x,y} → startViewTransition; dataset.mascot синхронно для снапшота.
+- НЕ перенесено (честно): 7-шаговая последовательность «узел пройден» (конфетти/звезда в счётчик/дорисовка золотом/прыжок маскота) — нужен hook в endRound; 3D-наклон jd за курсором; FLIP-шаблоны (пары/фраза/карточка); pad карточек 24 (оставлено 16); keypad-клавиши в стиле макета.
+- Commit d4d1786 на origin/main. Скриншоты 1440+390, обе темы — проверены. Прод по-прежнему ждёт vercel login.
