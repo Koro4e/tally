@@ -932,10 +932,10 @@ function Weg({
 
   return (
     <main className="mx-auto flex max-w-[430px] flex-col px-4 pt-4 lg:px-0">
-      {/* на телефоне это единственное место, где видно серию и цель дня */}
+      {/* на телефоне сверху — только серия и цель дня (канон: один экран —
+          одна цель); смена маскота — украшение, уезжает под дерево */}
       <div className="mb-4 lg:hidden">
         <Today mv={mv} m={m} onMix={onMix} />
-        <MascotPicker className="mt-3" />
       </div>
       {SECTIONS.map((sec) => {
         const done = sec.nodes.filter((s) => statusOf(s, m) === "mastered").length;
@@ -1007,6 +1007,11 @@ function Weg({
             : "Jeder Knoten hat einen Trainer. Gold heißt: alle Formen der Aufgabe bestanden.";
         })()}
       </p>
+
+      {/* смена маскота — на телефоне в конце пути, не перед ним */}
+      <div className="mt-4 mb-2 lg:hidden">
+        <MascotPicker />
+      </div>
 
       {jump && cur && (
         <div className="pointer-events-none fixed inset-x-0 bottom-24 z-30 lg:hidden">
