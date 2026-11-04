@@ -361,9 +361,8 @@ export default function Tutor({
     return () => window.clearInterval(id);
   }, [running]);
 
-  const curSec = running ? (Date.now() - taskStart.current) / 1000 : 0;
-  const par = task?.par ?? 1;
-  const pace = Math.min(1.4, curSec / Math.max(1, par));
+  /* curSec/par убраны вместе с полосой скорости; par остался в данных
+     задачи и калибровке — считается в log при отправке ответа. */
 
   /* ------------------------------------------------------------ отправка --- */
   const submit = async () => {
@@ -598,16 +597,9 @@ export default function Tutor({
           </span>
         </div>
 
-        {/* полоса par: до цели — зелёная, после — золотая, сильно после — красная */}
-        <div className="h-[3px] w-full bg-line">
-          <div
-            className={cn(
-              "h-full transition-[width] duration-200",
-              pace < 0.7 ? "bg-green" : pace <= 1 ? "bg-gold" : "bg-red",
-            )}
-            style={{ width: `${Math.min(100, (curSec / Math.max(1, par)) * 100)}%` }}
-          />
-        </div>
+        {/* полоса par убрана по решению хозяина: гонка с таймером давит и
+           сбивает с мысли. par по-прежнему меряется фоном и попадает в
+           калибровку сложности — просто больше не показывается. */}
       </header>
 
       <main className="mx-auto flex w-full max-w-[560px] flex-1 flex-col px-4 pt-7 pb-5 lg:justify-center">
