@@ -2,21 +2,21 @@
 
 @theme {
   /* система Duolingo: светлая, тёплая, всё на радиусах и «толстых» кнопках */
-  --color-bg: #f7f7f5;
+  --color-bg: #f8fafc;
   --color-card: #ffffff;
-  --color-line: #e5e5e5;
-  --color-ink: #3c3c3c;
-  --color-muted: #afafaf;
+  --color-line: #e2e8f0;
+  --color-ink: #1e293b;
+  --color-muted: #64748b;
   --color-green: #58cc02;
   --color-greend: #46a302;
   --color-greenl: #e8f8d8;
-  --color-blue: #1cb0f6;
-  --color-blued: #1899d6;
+  --color-blue: #0ea5e9;
+  --color-blued: #0284c7;
   --color-red: #ff4b4b;
   --color-redd: #e63939;
   --color-redl: #fff0f0;
-  --color-gold: #ffc800;
-  --color-goldd: #e0a800;
+  --color-gold: #f59e0b;
+  --color-goldd: #d97706;
 
   --font-sans:
     "Nunito", ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -366,61 +366,61 @@ sup {
    :root не селектится.
    ========================================================================== */
 :root[data-theme="dark"] {
-  --color-bg: #131f24;
-  --color-ink: #f1f7fb;
-  --color-muted: #8fa1ab;
-  --color-line: #37464f;
+  --color-bg: #0f172a;
+  --color-ink: #e2e8f0;
+  --color-muted: #94a3b8;
+  --color-line: #334155;
   /* приглушённые акценты (было «ядовито») */
-  --color-gold: #e8bd45;
-  --color-goldd: #c49c2e;
-  --color-blue: #5aabdc;
+  --color-gold: #fbbf24;
+  --color-goldd: #d97706;
+  --color-blue: #38bdf8;
 }
 :root[data-theme="dark"] body {
   background: var(--color-bg);
   color: var(--color-ink);
 }
-:root[data-theme="dark"] .bg-white { background-color: #1b2b31; }
-:root[data-theme="dark"] .btn3d-white { background-color: #1b2b31; color: var(--color-ink); }
-:root[data-theme="dark"] .btn3d-white:hover { background-color: #22343c; }
+:root[data-theme="dark"] .bg-white { background-color: #1e293b; }
+:root[data-theme="dark"] .btn3d-white { background-color: #1e293b; color: var(--color-ink); }
+:root[data-theme="dark"] .btn3d-white:hover { background-color: #273449; }
 :root[data-theme="dark"] .bg-greenl { background-color: var(--color-greenl); }
 :root[data-theme="dark"] .hover\:bg-black\/\[0\.04\]:hover { background-color: rgba(255, 255, 255, 0.06); }
-:root[data-theme="dark"] .bg-\[\#fafafa\] { background-color: #22343c; }
-:root[data-theme="dark"] .bg-\[\#f7f7f7\] { background-color: #22343c; }
-:root[data-theme="dark"] .bg-\[\#ececec\] { background-color: #2a3b44; }
+:root[data-theme="dark"] .bg-\[\#fafafa\] { background-color: #172033; }
+:root[data-theme="dark"] .bg-\[\#f7f7f7\] { background-color: #172033; }
+:root[data-theme="dark"] .bg-\[\#ececec\] { background-color: #273449; }
 :root[data-theme="dark"] .border-\[\#dcdcdc\] { border-color: var(--color-line); }
 :root[data-theme="dark"] .text-\[\#c2c2c2\] { color: #6b7f8a; }
 :root[data-theme="dark"] .text-\[\#cfcfcf\] { color: #5c6f79; }
 :root[data-theme="dark"] .text-\[\#d4d4d4\] { color: #5c6f79; }
 :root[data-theme="dark"] .text-\[\#afafaf\] { color: #8fa1ab; }
-:root[data-theme="dark"] .bg-\[\#d7ffb8\] { background-color: #1f4d1f; }
-:root[data-theme="dark"] .bg-\[\#ffdfe0\] { background-color: #4d1f24; }
+:root[data-theme="dark"] .bg-\[\#d7ffb8\] { background-color: #064e3b; }
+:root[data-theme="dark"] .bg-\[\#ffdfe0\] { background-color: #3f1d24; }
 :root[data-theme="dark"] .bg-gold\/15 { background-color: rgba(255, 200, 0, 0.12); }
 :root[data-theme="dark"] .bg-gold\/25 { background-color: rgba(255, 200, 0, 0.18); }
 :root[data-theme="dark"] .bg-blue\/10 { background-color: rgba(28, 176, 246, 0.12); }
 
 /* приглушённые акценты по маскоту (перекрывают светлые блоки порядком) */
 :root[data-theme="dark"]:not([data-mascot]), :root[data-theme="dark"][data-mascot="pip"] {
-  --color-green: #74c94a;
-  --color-greend: #5da53a;
-  --color-greenl: #1d3a24;
+  --color-green: #34d399;
+  --color-greend: #10b981;
+  --color-greenl: #0b2b22;
 }
 :root[data-theme="dark"][data-mascot="hoot"] {
-  --color-green: #57b0e8;
-  --color-greend: #4392c4;
-  --color-greenl: #14303f;
+  --color-green: #38bdf8;
+  --color-greend: #0ea5e9;
+  --color-greenl: #0c2436;
 }
 :root[data-theme="dark"][data-mascot="mochi"] {
-  --color-green: #f2a355;
-  --color-greend: #d18a3f;
-  --color-greenl: #3d2a14;
+  --color-green: #fb923c;
+  --color-greend: #ea7a1c;
+  --color-greenl: #33200e;
 }
 :root[data-theme="dark"][data-mascot="bolt"] {
-  --color-green: #c39bee;
-  --color-greend: #a379c9;
-  --color-greenl: #2a1f3d;
+  --color-green: #c084fc;
+  --color-greend: #a855f7;
+  --color-greenl: #241536;
 }
 :root[data-theme="dark"][data-mascot="gloop"] {
-  --color-green: #f49cb9;
-  --color-greend: #d97e9c;
-  --color-greenl: #3d1f2a;
+  --color-green: #f472b6;
+  --color-greend: #ec4899;
+  --color-greenl: #330f22;
 }

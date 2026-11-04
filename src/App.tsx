@@ -21,8 +21,9 @@ import {
 } from "@/lib/mastery";
 import { cn } from "@/utils/cn";
 import { soundOn, setSound, toggleClick } from "@/lib/sfx";
-import { getTheme, cycleTheme, subscribe, type ThemeMode } from "@/lib/theme";
-import Exam, { lastExam } from "@/Exam";
+import { moodOf, petLine } from "@/Pet";
+import { getTheme, setTheme, subscribe, type ThemeMode } from "@/lib/theme";
+import Exam from "@/Exam";
 import Deutsch from "@/Deutsch";
 import SectionTest from "@/SectionTest";
 import MixTest from "@/MixTest";
@@ -30,13 +31,9 @@ import Pruefung from "@/Pruefung";
 import Vocab from "@/Vocab";
 import TopicPruefung from "@/TopicPruefung";
 import DeutschExam from "@/DeutschExam";
-import { load as dayLoad } from "@/lib/plan";
-import { form, plural } from "@/lib/de";
-import { loadC, summary as calibSummary } from "@/lib/calib";
 
 /* подставляется сборкой (см. define в vite.config.ts) */
 declare const __BUILD__: string;
-import { moodOf, petLine } from "@/Pet";
 import Mascot from "@/mascot/Mascot";
 import MascotPicker from "@/mascot/MascotPicker";
 import { useMascot } from "@/mascot/store";
@@ -99,6 +96,12 @@ export default function App() {
   const [subject, setSubject] = useState<Subject>("mathe");
   const [matheView, setMatheView] = useState<"weg" | "pruefung">("weg");
   const [deView, setDeView] = useState<"grammatik" | "woerter" | "pruefung">("grammatik");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => {
+    const open = () => setSettingsOpen(true);
+    document.addEventListener("tally:settings", open);
+    return () => document.removeEventListener("tally:settings", open);
+  }, []);
   /* промежуточная контрольная по разделу пути (см. SectionTest) */
   const [kontrolle, setKontrolle] = useState<Branch | null>(null);
   /* смешанная практика по всему пройденному (см. MixTest, Rohrer 2020) */
@@ -246,16 +249,11 @@ export default function App() {
       />
       <div className="lg:pl-[264px]">
 
-      {subject === "mathe" ? (
-        <div className="mx-auto flex w-full max-w-[1160px] items-start gap-8 px-4 lg:px-8">
-          <div className={cn(
-            "min-w-0 flex-1",
-            /* центр есть только на Weg (там правая панель); Prüfung и
-               Programm без панели центрируются, чтобы не липнуть к сайдбару */
-            matheView === "weg" && view === "weg"
-              ? "lg:max-w-[540px] lg:shrink-0"
-              : "lg:max-w-[620px] lg:mx-auto",
-          )}>
+      {settingsOpen ? (
+        <Einstellungen onBack={() => setSettingsOpen(false)} />
+      ) : subject === "mathe" ? (
+        <div className="mx-auto w-full max-w-[680px] px-4 lg:px-0">
+          <div className="min-w-0 flex-1">
             <div className="px-0 lg:hidden">
               <SubBar
                 items={[
@@ -268,7 +266,10 @@ export default function App() {
             </div>
             {matheView === "weg" ? (
               view === "weg" ? (
-                <Weg m={m} mv={mv} onPick={pickSkill} onKontrolle={setKontrolle} onMix={() => setMix(true)} />
+                <>
+                  <NextUp m={m} onPick={pickSkill} />
+                  <Weg m={m} mv={mv} onPick={pickSkill} onKontrolle={setKontrolle} onMix={() => setMix(true)} />
+                </>
               ) : (
                 <Programm m={m} />
               )
@@ -280,12 +281,10 @@ export default function App() {
               />
             )}
           </div>
-          {matheView === "weg" && (
-            <Aside m={m} mv={mv} onPick={pickSkill} onExam={() => setExam(true)} onMix={() => setMix(true)} />
-          )}
         </div>
       ) : (
         <div className="mx-auto w-full max-w-[720px] px-4 lg:px-0">
+          {/* Deutsch — та же центрированная колонна */}
           <div className="lg:hidden">
             <SubBar
               items={[
@@ -390,56 +389,6 @@ function SubBar({
    подпись — какой режим активен. Живёт в сайдбаре (десктоп) и в шапке
    (телефон), рядом с кнопкой звука. */
 
-const THEME_META: Record<ThemeMode, { icon: React.ReactNode; label: string }> = {
-  auto: {
-    icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
-        <circle cx="12" cy="12" r="8" />
-        <path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none" />
-      </svg>
-    ),
-    label: "Авто",
-  },
-  dark: {
-    icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M20 13.5A8.5 8.5 0 0 1 10.5 4 7.5 7.5 0 1 0 20 13.5Z" />
-      </svg>
-    ),
-    label: "Тёмная",
-  },
-  light: {
-    icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
-        <circle cx="12" cy="12" r="4.4" />
-        <path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3 19 19M19 5l-1.7 1.7M6.7 17.3 5 19" />
-      </svg>
-    ),
-    label: "Светлая",
-  },
-};
-
-function ThemeToggle({ compact = false }: { compact?: boolean }) {
-  const [mode, setMode] = useState<ThemeMode>(getTheme());
-  useEffect(() => subscribe(() => setMode(getTheme())), []);
-  const meta = THEME_META[mode];
-  return (
-    <button
-      type="button"
-      onClick={() => cycleTheme()}
-      aria-label={"Тема: " + meta.label + " (переключить)"}
-      title={"Тема: " + meta.label + " — переключить"}
-      className={cn(
-        "flex items-center gap-2 rounded-xl border-2 border-line bg-white px-3 text-ink transition-colors hover:bg-black/[0.04]",
-        compact ? "h-[34px] w-[34px] justify-center" : "w-full py-2.5 text-[12.5px] font-extrabold",
-      )}
-    >
-      <span className="text-green">{meta.icon}</span>
-      {!compact && <span className="ml-auto">{meta.label}</span>}
-    </button>
-  );
-}
-
 function ShellSidebar({
   subject,
   onSubject,
@@ -538,10 +487,17 @@ function ShellSidebar({
           {c.done} / {c.total} Knoten
         </p>
         <div className="mt-3 border-t-2 border-line pt-3">
-          <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
-            Оформление
-          </p>
-          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => document.dispatchEvent(new CustomEvent("tally:settings"))}
+            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-extrabold text-ink/70 transition-colors hover:bg-black/[0.04] hover:text-ink"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="3.2" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09A1.7 1.7 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.56 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z" />
+            </svg>
+            Настройки
+          </button>
         </div>
       </div>
     </aside>
@@ -599,7 +555,17 @@ function ShellHeader({
             )}
           </svg>
         </button>
-        <ThemeToggle compact />
+        <button
+          type="button"
+          aria-label="Настройки"
+          onClick={() => document.dispatchEvent(new CustomEvent("tally:settings"))}
+          className="rounded-lg p-1.5 text-ink transition-colors hover:bg-black/[0.04]"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <circle cx="12" cy="12" r="3.2" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09A1.7 1.7 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.56 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z" />
+          </svg>
+        </button>
 
         <div className="hidden items-center gap-1 lg:flex">
           {SUBJECTS.map((s) => (
@@ -693,185 +659,111 @@ function TabBar({ subject, onSubject }: { subject: Subject; onSubject: (s: Subje
    просрочено. Кнопка здесь та же, что внизу на телефоне.
    -------------------------------------------------------------------------- */
 
-function Aside({
-  m,
-  mv,
-  onPick,
-  onExam,
-  onMix,
-}: {
-  m: M;
-  mv: Mv;
-  onPick: (s: Skill) => void;
-  onExam: () => void;
-  onMix: () => void;
-}) {
+/* ----------------------------------------------------------------- путь --- */
+
+/* змейка-смещение убрано: с линией тропы оно читалось как «кружки стоят мимо
+   пути», а не как тропа. Теперь путь держит линия, а не сдвиг. */
+const POS = new Map(PATH.map((s, i) => [s.id, i]));
+
+function NextUp({ m, onPick }: { m: M; onPick: (s: Skill) => void }) {
   const cur = useMemo(() => current(m), [m]);
-  const review = useMemo(() => PATH.filter((s) => statusOf(s, m) === "review"), [m]);
-  const plan = useMemo(() => dayLoad(m), [m]);
-  const cal = useMemo(() => calibSummary(loadC()), []);
-  const exam = useMemo(() => lastExam(), []);
-
+  if (!cur) return null;
   return (
-    <aside className="hidden lg:sticky lg:top-[70px] lg:block lg:w-[336px] lg:shrink-0">
-      <Today mv={mv} m={m} />
-      <MascotPicker className="mt-3" />
-
-      {cur && (
-        <div className="card3d mt-3 rounded-card border-2 border-green bg-white p-4">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-green">
-            Jetzt dran
-          </p>
-          <p className="mt-1 text-[15px] leading-tight font-extrabold">{cur.de}</p>
-          <p className="text-[11.5px] font-semibold text-muted">{cur.ru}</p>
-          {covText(cur, m[cur.id]) && (
-            <p className="tnum mt-2 text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
-              {covText(cur, m[cur.id])} Proben
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={() => onPick(cur)}
-            className="btn3d btn3d-green mt-3 w-full rounded-xl px-3 py-3 text-[11.5px] font-extrabold tracking-[0.04em] uppercase"
-          >
-            <span className="block truncate">Weiter: {cur.de}</span>
-          </button>
-        </div>
+    <div className="card3d mb-4 rounded-card border-2 border-green bg-white p-4">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-green">
+        Jetzt dran
+      </p>
+      <p className="mt-1 text-[15px] leading-tight font-extrabold">{cur.de}</p>
+      <p className="text-[11.5px] font-semibold text-muted">{cur.ru}</p>
+      {covText(cur, m[cur.id]) && (
+        <p className="tnum mt-2 text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
+          {covText(cur, m[cur.id])} Proben
+        </p>
       )}
-
       <button
         type="button"
-        onClick={onMix}
-        className="btn3d btn3d-white w-full rounded-xl px-3 py-2.5 text-[10.5px] font-extrabold tracking-[0.06em] uppercase"
+        onClick={() => onPick(cur)}
+        className="btn3d btn3d-green mt-3 w-full rounded-xl px-3 py-3 text-[11.5px] font-extrabold tracking-[0.04em] uppercase"
       >
-        Mix-Runde · повторение вперемешку
+        <span className="block truncate">Weiter: {cur.de}</span>
       </button>
-
-      {/* ------------------------------------------------------- нагрузка ---
-          Не «мотивационная цитата», а число: сколько новых узлов надо
-          закрыть сегодня, чтобы успеть к 9 января. Число считается из
-          календаря и остатка пути, поэтому само растёт по мере приближения
-          экзамена — это и есть прогрессия нагрузки. */}
-      <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
-        <div className="flex items-baseline justify-between">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
-            Tagesplan
-          </p>
-          <span className="tnum text-[10.5px] font-extrabold text-muted">
-            {plan.days} Tage
-          </span>
-        </div>
-        <div className="mt-1.5 flex items-end gap-1.5">
-          <span className="tnum text-[26px] leading-none font-extrabold">{plan.neu}</span>
-          <span className="pb-0.5 text-[11px] font-extrabold text-muted">
-            {form(plan.neu, "neuer Knoten", "neue Knoten")} ·{" "}
-            {plural(plan.reviews, "Wiederholung", "Wiederholungen")}
-          </span>
-        </div>
-        <p className="mt-1 text-[11px] font-semibold text-muted">
-          {plan.remaining === 0
-            ? "Alles offen ist geschlossen — jetzt halten."
-            : plan.onTrack
-              ? `Im Plan. Noch ${plan.remaining} Knoten bis Januar.`
-              : `Rückstand: ${plan.remaining} Knoten bei ${plan.days} Tagen.`}
-        </p>
-        <div className="mt-2 flex gap-1">
-          {Array.from({ length: Math.min(plan.neu, 5) }).map((_, i) => (
-            <span
-              key={i}
-              className={cn("h-1.5 flex-1 rounded-full", i < plan.today ? "bg-green" : "bg-line")}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* ------------------------------------------------------ экзамен ----- */}
-      <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
-        <div className="flex items-baseline justify-between">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-gold">
-            Probeprüfung
-          </p>
-          {exam && (
-            <span className="tnum text-[10.5px] font-extrabold text-muted">
-              {exam.pts} / {exam.max}
-            </span>
-          )}
-        </div>
-        <p className="mt-1 text-[11.5px] font-semibold text-muted">
-          {exam
-            ? "60 Minuten, 7 Aufgaben, 20 Punkte — wie am 9. Januar."
-            : "Einmal unter echten Bedingungen: 60 Minuten, kein Taschenrechner."}
-        </p>
-        <button
-          type="button"
-          onClick={onExam}
-          className="btn3d btn3d-white mt-2.5 w-full rounded-xl px-3 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.06em]"
-        >
-          {exam ? "Nochmal schreiben" : "Prüfung schreiben"}
-        </button>
-      </div>
-
-      {/* --------------------------------------------------- калибровка ----- */}
-      {cal.n > 0 && (
-        <p className="mt-3 px-1 text-[10px] leading-[1.5] font-bold text-muted">
-          Kalibrierung: {plural(cal.forms, "Form", "Formen")},{" "}
-          {plural(cal.n, "Antwort", "Antworten")} · Treffer{" "}
-          {Math.round(cal.acc * 100)} % · Tempo {cal.pace.toFixed(2)}× Par
-        </p>
-      )}
-
-      {review.length > 0 && (
-        <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
-          <div className="flex items-baseline justify-between">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-blue">
-              Wiederholen
-            </p>
-            <span className="tnum text-[10.5px] font-extrabold text-muted">{review.length}</span>
-          </div>
-          <div className="mt-1.5 space-y-0.5">
-            {review.slice(0, 4).map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => onPick(s)}
-                className="flex w-full items-center gap-2 rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-black/[0.04] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue"
-              >
-                <span className="w-3 shrink-0 text-center text-[13px] leading-none font-extrabold text-blue">
-                  ↻
-                </span>
-                <span className="min-w-0 flex-1 truncate text-[12px] font-bold">{s.de}</span>
-              </button>
-            ))}
-          </div>
-          {review.length > 4 && (
-            <p className="mt-1 text-[10.5px] font-bold text-muted">
-              +{review.length - 4} weitere
-            </p>
-          )}
-        </div>
-      )}
-
-      <div className="mt-4 px-1">
-        <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
-          Legende
-        </p>
-        <ul className="space-y-1.5">
-          <Legend cls="bg-gold" label="bestanden — alle Formen, Wiederholung geplant" />
-          <Legend cls="bg-blue" label="Wiederholung fällig" />
-          <Legend cls="border-2 border-green bg-white" label="offen — hier geht es weiter" />
-          <Legend cls="bg-[#e5e5e5]" label="gesperrt — erst die Themen davor" />
-          <Legend cls="border-2 border-line bg-transparent" label="noch kein Trainer" />
-        </ul>
-      </div>
-    </aside>
+    </div>
   );
 }
 
-/* ------------------------------------------------------------- сегодня ---
-   Главная карточка машины. Порядок чтения выбран по важности, а не по
-   яркости: серия (привычка), цель дня (объём), неделя (регулярность), и
-   последней строкой — темп к экзамену, который и есть настоящая цель.
-   -------------------------------------------------------------------------- */
+/* ------------------------------------------------------- настройки ------- */
+
+function Einstellungen({ onBack }: { onBack: () => void }) {
+  const [mode, setMode] = useState<ThemeMode>(getTheme());
+  useEffect(() => subscribe(() => setMode(getTheme())), []);
+  const [snd, setSnd] = useState(soundOn);
+  const modes: { id: ThemeMode; de: string }[] = [
+    { id: "light", de: "Светлая" },
+    { id: "dark", de: "Тёмная" },
+    { id: "auto", de: "Системная" },
+  ];
+  return (
+    <div className="mx-auto w-full max-w-[680px] px-4 py-6">
+      <button
+        type="button"
+        onClick={onBack}
+        className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted hover:text-ink"
+      >
+        ← Назад
+      </button>
+      <h1 className="mt-3 text-[24px] font-extrabold tracking-[-0.01em]">Настройки</h1>
+
+      <section className="card3d mt-4 rounded-card border-2 border-line bg-white p-4">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Тема</p>
+        <div className="mt-2 flex gap-2">
+          {modes.map((x) => (
+            <button
+              key={x.id}
+              type="button"
+              onClick={() => setTheme(x.id)}
+              aria-pressed={mode === x.id}
+              className={cn(
+                "btn3d flex-1 rounded-xl border-2 px-2 py-2.5 text-[12px] font-extrabold",
+                mode === x.id
+                  ? "border-green bg-greenl text-greend [--btn-shadow:var(--color-greend)]"
+                  : "border-line bg-white text-muted [--btn-shadow:var(--color-line)]",
+              )}
+            >
+              {x.de}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Маскот</p>
+        <MascotPicker className="mt-2 border-0 p-0 shadow-none" />
+      </section>
+
+      <section className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[13px] font-extrabold">Звук</p>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !snd;
+              setSnd(next);
+              setSound(next);
+              if (next) toggleClick();
+            }}
+            aria-pressed={snd}
+            className={cn(
+              "btn3d rounded-xl px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.08em]",
+              snd ? "btn3d-green" : "btn3d-white",
+            )}
+          >
+            {snd ? "An" : "Aus"}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 function Today({ mv, m, onMix }: { mv: Mv; m: M; onMix?: () => void }) {
   const s = snapOf(mv);
@@ -951,21 +843,6 @@ function Today({ mv, m, onMix }: { mv: Mv; m: M; onMix?: () => void }) {
     </div>
   );
 }
-
-function Legend({ cls, label }: { cls: string; label: string }) {
-  return (
-    <li className="flex items-start gap-2">
-      <span className={cn("mt-[3px] h-3 w-3 shrink-0 rounded-full", cls)} />
-      <span className="text-[11px] leading-snug font-semibold text-[#8a8a8a]">{label}</span>
-    </li>
-  );
-}
-
-/* ----------------------------------------------------------------- путь --- */
-
-/* змейка-смещение убрано: с линией тропы оно читалось как «кружки стоят мимо
-   пути», а не как тропа. Теперь путь держит линия, а не сдвиг. */
-const POS = new Map(PATH.map((s, i) => [s.id, i]));
 
 function Weg({
   m,
