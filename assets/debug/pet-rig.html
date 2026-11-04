@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>TALLY · Pet Rig</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #f7f7f5; overflow: hidden; }
+      body { font-family: "Nunito", "Segoe UI", system-ui, sans-serif; color: #3c3c3c; }
+      #stage { position: fixed; inset: 0; }
+      #ui {
+        position: fixed; left: 0; right: 0; bottom: 16px;
+        display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 0 12px;
+      }
+      #ui button {
+        border: 2px solid #e5e5e5; background: #fff; color: #3c3c3c; border-radius: 14px;
+        padding: 9px 15px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+        box-shadow: 0 2px 0 #e5e5e5;
+      }
+      #ui button[aria-pressed="true"] { border-color: #58cc02; color: #58cc02; box-shadow: 0 2px 0 #58cc02; }
+      #ui button.ghost { font-weight: 700; color: #8a8a8a; }
+      #hint {
+        position: fixed; left: 0; right: 0; top: 14px; text-align: center;
+        font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #b5b5b5;
+        pointer-events: none;
+      }
+      #stat { position: fixed; left: 14px; top: 12px; font-size: 11px; font-weight: 700; color: #b5b5b5; }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="stat"></div>
+    <div id="hint">Maus — er schaut hin · ziehen — drehen</div>
+    <div id="ui">
+      <button data-clip="satt">satt</button>
+      <button data-clip="ok">ok</button>
+      <button data-clip="hungrig">hungrig</button>
+      <button data-clip="traurig">traurig</button>
+      <button data-clip="essen">essen</button>
+      <button id="bones" class="ghost" aria-pressed="false">Knochen</button>
+    </div>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+      const stage = document.getElementById("stage");
+      const stat = document.getElementById("stat");
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.NeutralToneMapping;
+      stage.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 0.1, 50);
+      camera.position.set(0, 0.55, 3.4);
+      camera.lookAt(0, 0.5, 0);
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xdff0e6, 2.1));
+      const key = new THREE.DirectionalLight(0xfffdf7, 2.4);
+      key.position.set(-1.6, 2.6, 2.4);
+      key.castShadow = true;
+      key.shadow.mapSize.set(1024, 1024);
+      key.shadow.camera.near = 0.5;
+      key.shadow.camera.far = 12;
+      key.shadow.camera.top = 1.6;
+      key.shadow.camera.bottom = -1.6;
+      key.shadow.radius = 4;
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xe8f4ff, 0.7);
+      fill.position.set(2.2, 1.0, 1.6);
+      scene.add(fill);
+
+      // мягкая тень под лапами: без неё мишка «висит»
+      const shadow = new THREE.Mesh(
+        new THREE.CircleGeometry(0.5, 48),
+        new THREE.MeshBasicMaterial({
+          color: 0x2b3a30,
+          transparent: true,
+          opacity: 0.10,
+          depthWrite: false,
+          map: (() => {
+            const c = document.createElement("canvas");
+            c.width = c.height = 128;
+            const g = c.getContext("2d");
+            const grd = g.createRadialGradient(64, 64, 4, 64, 64, 62);
+            grd.addColorStop(0, "#fff");
+            grd.addColorStop(0.55, "#bbb");
+            grd.addColorStop(1, "#000");
+            g.fillStyle = grd;
+            g.fillRect(0, 0, 128, 128);
+            const t = new THREE.CanvasTexture(c);
+            t.colorSpace = THREE.SRGBColorSpace;
+            return t;
+          })(),
+        })
+      );
+      shadow.rotation.x = -Math.PI / 2;
+      shadow.position.y = 0.002;
+      scene.add(shadow);
+
+      const rigRoot = new THREE.Group();
+      scene.add(rigRoot);
+
+      let mixer = null;
+      let clips = {};
+      let current = null;
+      let headBone = null;
+      let skeletonHelper = null;
+
+      /* ------------------------------------------------------------ сцена --- */
+      new GLTFLoader().load(
+        "../pet-rig-v1.glb",
+        (gltf) => {
+          rigRoot.add(gltf.scene);
+          gltf.scene.traverse((o) => {
+            if (o.isMesh) {
+              o.castShadow = true;
+              o.frustumCulled = false;
+              o.material.envMapIntensity = 0.4;
+              if (o.material.vertexColors === false && o.material.name === "TallyFur") {
+                o.material.vertexColors = true;
+                o.material.needsUpdate = true;
+              }
+            }
+          });
+
+          headBone = gltf.scene.getObjectByName("head") || null;
+          mixer = new THREE.AnimationMixer(gltf.scene);
+          clips = Object.fromEntries(gltf.animations.map((c) => [c.name, c]));
+          stat.textContent = `${gltf.animations.length} Clips · ${Object.keys(clips).join(" / ")}`;
+          window.__rig = { clips };
+
+          const skinned = gltf.scene.getObjectByName("TallyBody");
+          if (skinned) {
+            // helper строим от корня модели: он сам собирает кости из детей
+            skeletonHelper = new THREE.SkeletonHelper(gltf.scene);
+            skeletonHelper.material.depthTest = false;
+            skeletonHelper.material.transparent = true;
+            skeletonHelper.material.linewidth = 3;
+            skeletonHelper.renderOrder = 999;
+            skeletonHelper.visible = false;
+            rigRoot.add(skeletonHelper);
+            window.__bones = skeletonHelper.bones.length;
+          }
+          play("satt");
+        },
+        undefined,
+        (err) => {
+          stat.textContent = "GLB nicht geladen: " + err;
+        }
+      );
+
+      function play(name, once = false) {
+        const clip = clips[name];
+        if (!clip || !mixer) return;
+        const next = mixer.clipAction(clip);
+        next.reset();
+        next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+        next.clampWhenFinished = once;
+        next.enabled = true;
+        next.fadeIn(0.25).play();
+        if (current && current !== next) current.fadeOut(0.25);
+        current = next;
+        for (const b of document.querySelectorAll("[data-clip]")) {
+          b.setAttribute("aria-pressed", String(b.dataset.clip === name));
+        }
+      }
+
+      document.querySelectorAll("[data-clip]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const name = btn.dataset.clip;
+          if (name === "essen") {
+            play("essen", true);
+            setTimeout(() => play(mood), 900);
+          } else {
+            mood = name;
+            play(name);
+          }
+        });
+      });
+
+      let mood = "satt";
+
+
+      const boneBtn = document.getElementById("bones");
+      boneBtn.addEventListener("click", () => {
+        const on = boneBtn.getAttribute("aria-pressed") !== "true";
+        boneBtn.setAttribute("aria-pressed", String(on));
+        if (skeletonHelper) skeletonHelper.visible = on;
+      });
+
+      /* --------------------------------------------------------- вращение --- */
+      let dragging = false;
+      let lastX = 0;
+      let spin = 0;
+      let velocity = 0;
+      const pointer = new THREE.Vector2();
+
+      renderer.domElement.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        lastX = e.clientX;
+      });
+      addEventListener("pointerup", () => (dragging = false));
+      addEventListener("pointermove", (e) => {
+        if (dragging) {
+          velocity += (e.clientX - lastX) * 0.01;
+          lastX = e.clientX;
+        }
+        pointer.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+      });
+
+      const clock = new THREE.Clock();
+      function tick() {
+        const dt = Math.min(clock.getDelta(), 0.05);
+        if (mixer) mixer.update(dt);
+
+        // голова тянется за курсором: правим уже после микшера, поверх клипа
+        if (headBone) {
+          const yaw = THREE.MathUtils.clamp(pointer.x * 0.35, -0.35, 0.35);
+          const pitch = THREE.MathUtils.clamp(-pointer.y * 0.18, -0.18, 0.18);
+          headBone.rotation.y += yaw;
+          headBone.rotation.x += pitch;
+        }
+
+        spin += velocity;
+        velocity *= 0.92;
+        if (!dragging) spin += Math.sin(performance.now() / 3400) * 0.0006;
+        rigRoot.rotation.y = THREE.MathUtils.clamp(spin, -1.2, 1.2);
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      tick();
+
+      addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+      });
+    </script>
+  </body>
+</html>

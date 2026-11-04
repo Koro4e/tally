@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TALLY · GLB viewer</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #f7f7f5; overflow: hidden; }
+      #stage { position: fixed; inset: 0; }
+      #info {
+        position: fixed; left: 12px; bottom: 10px; font: 600 11px/1.4 system-ui, sans-serif;
+        color: #9a9a9a; pointer-events: none;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="info"></div>
+    <script type="module">
+      import * as THREE from "three";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      document.getElementById("stage").appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf7f7f5);
+
+      const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe8e0, 1.4));
+      const key = new THREE.DirectionalLight(0xffffff, 2.0);
+      key.position.set(-2.5, 3.5, 3.0);
+      scene.add(key);
+      const rim = new THREE.DirectionalLight(0xffffff, 0.8);
+      rim.position.set(2.5, 1.0, -3.0);
+      scene.add(rim);
+
+      const pivot = new THREE.Group();
+      scene.add(pivot);
+
+      let model = null;
+
+      new GLTFLoader().load("../pet-model.glb", (gltf) => {
+        model = gltf.scene;
+        pivot.add(model);
+
+        const box = new THREE.Box3().setFromObject(model);
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size);
+        box.getCenter(center);
+
+        model.position.sub(center); // ставим центр в ноль
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const dist = maxDim / (2 * Math.tan((camera.fov * Math.PI) / 360)) * 1.35;
+
+        camera.position.set(0, 0, dist);
+        camera.lookAt(0, 0, 0);
+        camera.updateProjectionMatrix();
+
+        let tris = 0;
+        model.traverse((o) => {
+          if (o.isMesh) {
+            const g = o.geometry;
+            tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
+          }
+        });
+        document.getElementById("info").textContent =
+          `размер ${size.x.toFixed(2)} × ${size.y.toFixed(2)} × ${size.z.toFixed(2)} · ~${Math.round(tris).toLocaleString("ru-RU")} треугольников`;
+
+        window.__ready = true;
+      });
+
+      window.__setYaw = (deg) => {
+        pivot.rotation.y = (deg * Math.PI) / 180;
+      };
+      window.__setPitch = (deg) => {
+        pivot.rotation.x = (deg * Math.PI) / 180;
+      };
+
+      function resize() {
+        const w = innerWidth;
+        const h = innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      addEventListener("resize", resize);
+      resize();
+
+      (function tick() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      })();
+    </script>
+  </body>
+</html>

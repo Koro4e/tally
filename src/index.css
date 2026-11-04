@@ -1,0 +1,360 @@
+@import "tailwindcss";
+
+@theme {
+  /* система Duolingo: светлая, тёплая, всё на радиусах и «толстых» кнопках */
+  --color-bg: #f7f7f5;
+  --color-card: #ffffff;
+  --color-line: #e5e5e5;
+  --color-ink: #3c3c3c;
+  --color-muted: #afafaf;
+  --color-green: #58cc02;
+  --color-greend: #46a302;
+  --color-greenl: #e8f8d8;
+  --color-blue: #1cb0f6;
+  --color-blued: #1899d6;
+  --color-red: #ff4b4b;
+  --color-redd: #e63939;
+  --color-redl: #fff0f0;
+  --color-gold: #ffc800;
+  --color-goldd: #e0a800;
+
+  --font-sans:
+    "Nunito", ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --radius-card: 16px;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-weight: 600;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* «толстая» кнопка — главный приём Duolingo: нижняя тень как у физической клавиши */
+.btn3d {
+  box-shadow: 0 4px 0 var(--btn-shadow, rgba(0, 0, 0, 0.15));
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease,
+    background-color 120ms ease;
+}
+.btn3d:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--btn-shadow, rgba(0, 0, 0, 0.15));
+}
+.btn3d:disabled {
+  box-shadow: 0 4px 0 var(--color-line);
+}
+
+.btn3d-green {
+  background: var(--color-green);
+  color: #fff;
+  --btn-shadow: var(--color-greend);
+}
+.btn3d-green:hover:not(:disabled) {
+  /* чуть светлее выбранного акцента — работает для любого маскота */
+  background: color-mix(in srgb, var(--color-green) 88%, #fff);
+}
+.btn3d-gold {
+  background: var(--color-gold);
+  color: #6b5000;
+  --btn-shadow: var(--color-goldd);
+}
+.btn3d-gold:hover:not(:disabled) {
+  background: #ffd21f;
+}
+.btn3d-white {
+  background: #fff;
+  color: var(--color-ink);
+  border: 2px solid var(--color-line);
+  --btn-shadow: var(--color-line);
+}
+.btn3d-white:hover:not(:disabled) {
+  background: #fafafa;
+}
+
+/* карточка с той же логикой, но тоньше */
+.card3d {
+  box-shadow: 0 2px 0 var(--color-line);
+}
+
+/* математика: верхние и нижние индексы должны быть заметно меньше строки */
+math-sup,
+sup {
+  font-size: 0.58em;
+  line-height: 0;
+}
+
+/* пульсация текущего узла на пути */
+@keyframes halo {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-green) 32%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-green) 0%, transparent);
+  }
+}
+
+/* Зверёк: три слоя, у каждого свой transform, чтобы они не затирали друг
+   друга. Снизу вверх:
+     .pet-look — внимание (пружина к курсору), пишет lib/life.ts
+     .pet-sway — дыхание, покачивание, боб, дрожь — тоже life.ts
+     .pet-body — статичная обёртка под картинку и заплатки век
+   Всё непрерывное движение живёт в rAF, а не в @keyframes: одна синусоида
+   с фиксированным периодом читается как метроном. */
+.pet-look {
+  transform: translate3d(var(--ax, 0px), var(--ay, 0px), 0) rotate(var(--arot, 0deg));
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+.pet-sway {
+  transform: translate3d(var(--bx, 0px), var(--by, 0px), 0) rotate(var(--brot, 0deg))
+    scale(var(--sx, 1), var(--sy, 1));
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+/* взгляд: картинка едет внутри окна на пару пикселей — читается как поворот
+   головы, хотя кадр один и тот же */
+.pet-body > img {
+  transform: translateX(var(--gx, 0px));
+}
+
+/* сердечки при кормлении */
+@keyframes heartup {
+  0% {
+    opacity: 0;
+    transform: translateY(2px) scale(0.6);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1.05);
+  }
+}
+.heart {
+  color: #ff6b8a;
+  animation: heartup 1.2s ease-out forwards;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Собственные действия зверька.
+   Он не ждёт курсора: планировщик в Pet.tsx раз в несколько секунд выбирает
+   действие, а здесь оно просто проигрывается. Длительности совпадают с ACTS.
+   -------------------------------------------------------------------------- */
+.pet-act {
+  transform-origin: 50% 100%;
+}
+
+@keyframes actTiltL {
+  0%, 100% { transform: rotate(0deg); }
+  35% { transform: rotate(calc(-3.5deg * var(--amp, 1))); }
+  70% { transform: rotate(calc(-1deg * var(--amp, 1))); }
+}
+@keyframes actTiltR {
+  0%, 100% { transform: rotate(0deg); }
+  35% { transform: rotate(calc(3.5deg * var(--amp, 1))); }
+  70% { transform: rotate(calc(1deg * var(--amp, 1))); }
+}
+/* подскок: сначала приседание (антиципация), потом полёт, потом мягкая
+   посадка — без приседа он читается как «картинку дёрнули» */
+@keyframes actHop {
+  0%, 100% { transform: translateY(0) scale(1); }
+  18% { transform: translateY(0) scale(1.04, 0.95); }
+  55% { transform: translateY(calc(-11% * var(--amp, 1))) scale(0.98, 1.03); }
+  80% { transform: translateY(0) scale(1.03, 0.97); }
+}
+@keyframes actStretch {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(0.97, calc(1 + 0.07 * var(--amp, 1))); }
+  75% { transform: scale(1.01, 1.01); }
+}
+@keyframes actPaceL {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-5%) rotate(-2deg); }
+  45% { transform: translateX(-15%) rotate(1deg); }
+  70% { transform: translateX(-10%) rotate(-1.5deg); }
+}
+@keyframes actPaceR {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(5%) rotate(2deg); }
+  45% { transform: translateX(15%) rotate(-1deg); }
+  70% { transform: translateX(10%) rotate(1.5deg); }
+}
+
+/* --- реакции и пасхалки ---------------------------------------------------- */
+
+/* верный ответ: присел, подпрыгнул выше обычного, приземлился с отскоком */
+@keyframes actCheer {
+  0% { transform: translateY(0) scale(1); }
+  12% { transform: translateY(0) scale(1.06, 0.92); }
+  42% { transform: translateY(calc(-17% * var(--amp, 1))) scale(0.96, 1.06) rotate(-2deg); }
+  62% { transform: translateY(0) scale(1.07, 0.93); }
+  78% { transform: translateY(-4%) scale(0.99, 1.01) rotate(1.5deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+/* неверный: сжался и отшатнулся в сторону, потом осторожно выпрямился */
+@keyframes actFlinch {
+  0% { transform: translateX(0) scale(1); }
+  15% { transform: translateX(3%) scale(0.94, 0.90) rotate(2deg); }
+  40% { transform: translateX(6%) scale(0.93, 0.92) rotate(3deg); }
+  70% { transform: translateX(2%) scale(0.98, 0.99) rotate(1deg); }
+  100% { transform: translateX(0) scale(1); }
+}
+/* зевает: тянется вверх и вниз, медленно */
+@keyframes actYawn {
+  0%, 100% { transform: scale(1) translateY(0); }
+  35% { transform: scale(0.96, 1.09) translateY(-2%); }
+  65% { transform: scale(1.02, 0.98) translateY(1%); }
+}
+/* почёсывается: мелкая быстрая дрожь вбок */
+@keyframes actScratch {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-4deg) translateX(-1%); }
+  25% { transform: rotate(3deg) translateX(1%); }
+  40% { transform: rotate(-3deg); }
+  55% { transform: rotate(2deg); }
+  70% { transform: rotate(-1.5deg); }
+}
+/* чихает: набирает, резко вниз-вперёд, отдача назад */
+@keyframes actSneeze {
+  0% { transform: scale(1) translateY(0); }
+  30% { transform: scale(0.97, 1.06) translateY(-3%); }
+  45% { transform: scale(1.10, 0.88) translateY(3%) rotate(3deg); }
+  60% { transform: scale(0.98, 1.02) translateY(-1%) rotate(-2deg); }
+  100% { transform: scale(1) translateY(0); }
+}
+/* оборот вокруг себя */
+@keyframes actRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(0.94); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+/* танец: три такта влево-вправо с подскоком */
+@keyframes actDance {
+  0%, 100% { transform: translateX(0) rotate(0deg) translateY(0); }
+  12% { transform: translateX(-7%) rotate(-6deg) translateY(-4%); }
+  30% { transform: translateX(7%) rotate(6deg) translateY(0); }
+  48% { transform: translateX(-6%) rotate(-5deg) translateY(-5%); }
+  66% { transform: translateX(6%) rotate(5deg) translateY(0); }
+  84% { transform: translateX(-3%) rotate(-2deg) translateY(-2%); }
+}
+
+.act-tilt-l { animation: actTiltL 0.9s ease-in-out; }
+.act-tilt-r { animation: actTiltR 0.9s ease-in-out; }
+.act-hop { animation: actHop 0.62s ease-out; }
+.act-stretch { animation: actStretch 0.9s ease-in-out; }
+.act-pace-l { animation: actPaceL 1.3s ease-in-out; }
+.act-pace-r { animation: actPaceR 1.3s ease-in-out; }
+.act-cheer { animation: actCheer 0.85s cubic-bezier(0.22, 1.2, 0.36, 1); }
+.act-flinch { animation: actFlinch 0.7s ease-out; }
+.act-yawn { animation: actYawn 1.4s ease-in-out; }
+.act-scratch { animation: actScratch 0.9s ease-in-out; }
+.act-sneeze { animation: actSneeze 0.75s ease-out; }
+.act-roll { animation: actRoll 0.9s cubic-bezier(0.4, 0, 0.3, 1); }
+.act-dance { animation: actDance 1.5s ease-in-out; }
+
+/* дремота: сама амплитуда гасится в life.ts (setCalm), здесь только веки */
+.act-doze { animation: none; }
+
+/* --- частицы ---------------------------------------------------------------
+   Один базовый класс, разное содержимое и траектория. Ставятся в абсолют
+   внутри .pet-act, живут 0.8–1.6 с и удаляются вместе с key. */
+@keyframes ptFloat {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.5) rotate(0deg); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--pdx, 0px), var(--pdy, -22px)) scale(1.05) rotate(var(--pr, 0deg)); }
+}
+.pt {
+  position: absolute;
+  pointer-events: none;
+  font-size: 11px;
+  line-height: 1;
+  animation: ptFloat var(--pdur, 1.2s) ease-out forwards;
+  will-change: transform, opacity;
+}
+.pt-heart { color: #ff6b8a; }
+.pt-spark { color: #f7c948; }
+.pt-zzz { color: #9aa7b2; font-weight: 800; }
+.pt-sweat { color: #7fb3e8; }
+.pt-bang { color: #ff8a3d; font-weight: 900; }
+
+/* Ходьба в комнате: покачивание висит на внутреннем слое, потому что у
+   внешнего уже занят transform (сдвиг по left и отражение по направлению). */
+@keyframes walkBob {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-5%); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-5%); }
+}
+.walk-bob { animation: walkBob 0.52s ease-in-out infinite; }
+
+/* ============================================================================
+   МАСКОТ-ТЕМА. Выбранный зверёк (data-mascot на <html>, см. src/mascot/store.ts)
+   переопределяет primary-акцент — семью green: все bg-green / btn3d-green /
+   border-green / text-green перекрашиваются сами. pip — дефолт, блок не нужен.
+   Семантику blue/gold/red (повторение / пройдено / ошибка) не трогаем.
+   ========================================================================== */
+:root[data-mascot="hoot"] {
+  --color-green: #1cb0f6;
+  --color-greend: #1899d6;
+  --color-greenl: #dcf3fd;
+}
+:root[data-mascot="mochi"] {
+  --color-green: #ff9600;
+  --color-greend: #e08600;
+  --color-greenl: #ffefdb;
+}
+:root[data-mascot="bolt"] {
+  --color-green: #ce82ff;
+  --color-greend: #a568cc;
+  --color-greenl: #f1e6fd;
+}
+:root[data-mascot="gloop"] {
+  --color-green: #ff86b4;
+  --color-greend: #e0628f;
+  --color-greenl: #ffe4ef;
+}

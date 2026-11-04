@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>TALLY · Pet 3D (Entwurf)</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #f7f7f5; overflow: hidden; }
+      body { font-family: "Nunito", "Segoe UI", system-ui, sans-serif; }
+      #stage { position: fixed; inset: 0; }
+      #hint {
+        position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+        font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+        color: #b5b5b5; pointer-events: none;
+      }
+      #ui { position: fixed; left: 0; right: 0; top: 14px; display: flex; gap: 8px; justify-content: center; }
+      #ui button {
+        border: 2px solid #e5e5e5; background: #fff; color: #3c3c3c; border-radius: 12px;
+        padding: 8px 14px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer;
+      }
+      #ui button:active { transform: translateY(2px); }
+    </style>
+    <script type="importmap">
+      { "imports": { "three": "https://unpkg.com/three@0.170.0/build/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="ui">
+      <button data-act="feed">Füttern</button>
+      <button data-act="sad">Traurig</button>
+      <button data-act="happy">Freude</button>
+    </div>
+    <div id="hint">Maus — er schaut hin · ziehen — drehen · Füttern — springt</div>
+
+    <script type="module">
+      import * as THREE from "three";
+
+      /* ======================================================================
+         ЭТЮД: единая оболочка + меховые слои.
+
+         Зачем единая оболочка. Мех рисуется вдоль нормалей поверхности.
+         На стыке двух пересекающихся сфер нормали смотрят в разные стороны,
+         и в месте пересечения вылезает шов. Поэтому тело — ОДНА сфера,
+         а уши, лапы и ноги — не отдельные шары, а вспучивания этой сферы:
+         радиальное смещение по гауссу от направления.
+
+         Мех — shells + fins: 26 копий той же геометрии, каждая сдвинута
+         вдоль нормали на свою долю длины, и каждая вырезается шумовой
+         маской, порог которой растёт к кончику. Слои дешёвые, геометрия
+         общая, шейдер свой.
+         ====================================================================== */
+
+      const MINT = new THREE.Color(0xa8e6c0);
+      const MINT_D = new THREE.Color(0x76b98f);
+      const CREAM = new THREE.Color(0xf2e6c2);
+      const INK = 0x16241f;
+
+      const stage = document.getElementById("stage");
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      stage.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+      camera.position.set(0, 0.1, 7.3);
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xe6efe8, 0.95));
+      const key = new THREE.DirectionalLight(0xffffff, 1.35);
+      key.position.set(-2.2, 3.0, 3.4);
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xdff0ff, 0.45);
+      fill.position.set(2.4, 0.8, 2.2);
+      scene.add(fill);
+
+      /* ------------------------------------------------------ оболочка --- */
+
+      const BUMPS = [
+        { dir: new THREE.Vector3(-0.50, 0.80, -0.16).normalize(), amp: 0.46, sigma: 0.27 }, // ухо
+        { dir: new THREE.Vector3(0.50, 0.80, -0.16).normalize(), amp: 0.46, sigma: 0.27 },
+        { dir: new THREE.Vector3(-0.98, -0.22, 0.10).normalize(), amp: 0.20, sigma: 0.26 }, // лапа
+        { dir: new THREE.Vector3(0.98, -0.22, 0.10).normalize(), amp: 0.20, sigma: 0.26 },
+        { dir: new THREE.Vector3(-0.42, -0.92, 0.26).normalize(), amp: 0.16, sigma: 0.24 }, // нога
+        { dir: new THREE.Vector3(0.42, -0.92, 0.26).normalize(), amp: 0.16, sigma: 0.24 },
+      ];
+
+      const geo = new THREE.SphereGeometry(1, 72, 54);
+      const pos = geo.attributes.position;
+      const tint = new Float32Array(pos.count * 3);
+      const v = new THREE.Vector3();
+      const n = new THREE.Vector3();
+
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i).normalize();
+        let d = 0;
+        for (const b of BUMPS) {
+          const ang = Math.acos(THREE.MathUtils.clamp(b.dir.dot(v), -1, 1));
+          d += b.amp * Math.exp(-((ang / b.sigma) ** 2));
+        }
+        n.copy(v).multiplyScalar(1 + d);
+        pos.setXYZ(i, n.x, n.y, n.z);
+
+        // живот: передняя нижняя часть получает кремовый оттенок
+        const belly =
+          0.5 *
+          (THREE.MathUtils.smoothstep(n.z, 0.45, 0.95) *
+            THREE.MathUtils.smoothstep(-n.y, -0.55, 0.15));
+        const c = MINT.clone().lerp(CREAM, THREE.MathUtils.clamp(belly, 0, 1));
+        tint[i * 3] = c.r;
+        tint[i * 3 + 1] = c.g;
+        tint[i * 3 + 2] = c.b;
+      }
+      geo.setAttribute("aTint", new THREE.BufferAttribute(tint, 3));
+      geo.computeVertexNormals();
+
+      /* ----------------------------------------------------------- мех --- */
+
+      const SHELLS = 28;
+      const FUR = 0.135;
+
+      const vert = /* glsl */ `
+        uniform float uH;
+        uniform float uLen;
+        attribute vec3 aTint;
+        varying vec3 vTint;
+        varying vec3 vN;
+        varying vec3 vPos;
+        void main() {
+          vTint = aTint;
+          vPos = position;
+          vN = normalize(normalMatrix * normal);
+          vec3 p = position + normal * (uH * uLen);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        }
+      `;
+
+      const frag = /* glsl */ `
+        uniform float uH;
+        uniform vec3 uDark;
+        varying vec3 vTint;
+        varying vec3 vN;
+        varying vec3 vPos;
+
+        float h31(vec3 p) {
+          return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453123);
+        }
+        float n3(vec3 p) {
+          vec3 i = floor(p);
+          vec3 f = fract(p);
+          vec3 u = f * f * (3.0 - 2.0 * f);
+          float a = mix(h31(i + vec3(0.0, 0.0, 0.0)), h31(i + vec3(1.0, 0.0, 0.0)), u.x);
+          float b = mix(h31(i + vec3(0.0, 1.0, 0.0)), h31(i + vec3(1.0, 1.0, 0.0)), u.x);
+          float c = mix(h31(i + vec3(0.0, 0.0, 1.0)), h31(i + vec3(1.0, 0.0, 1.0)), u.x);
+          float d = mix(h31(i + vec3(0.0, 1.0, 1.0)), h31(i + vec3(1.0, 1.0, 1.0)), u.x);
+          return mix(mix(a, b, u.y), mix(c, d, u.y), u.z);
+        }
+
+        void main() {
+          float fur = n3(vPos * 54.0) * 0.7 + n3(vPos * 140.0) * 0.3;
+          // режем только верхние слои: у основания мех сплошной, иначе
+          // получаются дыры и поверхность читается как камень
+          float cut = uH * uH * 0.62;
+          if (fur < cut) discard;
+
+          float d = max(dot(normalize(vN), normalize(vec3(-0.55, 0.75, 0.65))), 0.0);
+          vec3 col = mix(uDark, vTint, smoothstep(0.0, 0.35, uH));
+          col *= 0.82 + 0.32 * d;
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `;
+
+      const fur = new THREE.Group();
+      scene.add(fur);
+
+      for (let i = 0; i < SHELLS; i++) {
+        const h = i / (SHELLS - 1);
+        const m = new THREE.ShaderMaterial({
+          uniforms: {
+            uH: { value: h },
+            uLen: { value: FUR },
+            uDark: { value: MINT_D.clone().multiplyScalar(0.92) },
+          },
+          vertexShader: vert,
+          fragmentShader: frag,
+          side: THREE.DoubleSide,
+        });
+        fur.add(new THREE.Mesh(geo, m));
+      }
+
+      /* ---------------------------------------------------------- лицо --- */
+
+      const face = new THREE.Group();
+      scene.add(face);
+
+      const eyeMat = new THREE.MeshStandardMaterial({
+        color: INK,
+        roughness: 0.15,
+        metalness: 0.2,
+      });
+      const eyeGeo = new THREE.SphereGeometry(0.155, 28, 22);
+      const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+      const eyeR = eyeL.clone();
+      eyeL.position.set(-0.31, 0.2, 1.16);
+      eyeR.position.set(0.31, 0.2, 1.16);
+      face.add(eyeL, eyeR);
+
+      const glintMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const glintGeo = new THREE.SphereGeometry(0.048, 10, 8);
+      const gL = new THREE.Mesh(glintGeo, glintMat);
+      const gR = gL.clone();
+      gL.position.set(-0.27, 0.25, 1.29);
+      gR.position.set(0.35, 0.25, 1.29);
+      face.add(gL, gR);
+
+      const mouth = new THREE.Mesh(
+        new THREE.TorusGeometry(0.14, 0.019, 8, 20, Math.PI),
+        new THREE.MeshBasicMaterial({ color: INK }),
+      );
+      mouth.position.set(0, -0.05, 1.22);
+      mouth.rotation.z = Math.PI;
+      face.add(mouth);
+
+      /* --------------------------------------------------------- сцена --- */
+
+      const shadowTex = (() => {
+        const c = document.createElement("canvas");
+        c.width = c.height = 256;
+        const g = c.getContext("2d");
+        const grd = g.createRadialGradient(128, 128, 8, 128, 128, 126);
+        grd.addColorStop(0, "rgba(0,0,0,0.26)");
+        grd.addColorStop(0.5, "rgba(0,0,0,0.09)");
+        grd.addColorStop(1, "rgba(0,0,0,0)");
+        g.fillStyle = grd;
+        g.fillRect(0, 0, 256, 256);
+        return new THREE.CanvasTexture(c);
+      })();
+      const shadow = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.8, 1.5),
+        new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }),
+      );
+      shadow.rotation.x = -Math.PI / 2;
+      shadow.position.set(0, -1.32, 0.05);
+      scene.add(shadow);
+
+      /* ---------------------------------------------------------- ввод --- */
+
+      const pointer = { x: 0, y: 0 };
+      let spin = 0;
+      let spinVel = 0;
+      let dragging = false;
+      let lastX = 0;
+
+      window.addEventListener("pointermove", (e) => {
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+        if (dragging) {
+          spinVel += (e.clientX - lastX) * 0.0045;
+          lastX = e.clientX;
+        }
+      });
+      window.addEventListener("pointerdown", (e) => {
+        if (e.target.tagName === "BUTTON") return;
+        dragging = true;
+        lastX = e.clientX;
+      });
+      window.addEventListener("pointerup", () => (dragging = false));
+
+      const st = { mood: "ok", blinkAt: 2.2, blinkT: -1, hop: 0, wag: 0 };
+      document.getElementById("ui").addEventListener("click", (e) => {
+        const act = e.target?.dataset?.act;
+        if (act === "feed") {
+          st.hop = 1;
+          st.mood = "satt";
+        } else if (act === "sad") st.mood = "traurig";
+        else if (act === "happy") {
+          st.mood = "freude";
+          st.hop = 0.7;
+        }
+      });
+
+      /* ---------------------------------------------------------- цикл --- */
+
+      const clock = new THREE.Clock();
+      const root = new THREE.Group();
+      scene.add(root);
+      root.add(fur, face);
+
+      function resize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        const fit = Math.max(1, 1.15 / (w / h));
+        camera.position.z = 7.3 * Math.min(1.35, fit);
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      function tick() {
+        const dt = Math.min(0.05, clock.getDelta());
+        const t = clock.elapsedTime;
+        const sad = st.mood === "traurig";
+        const glad = st.mood === "satt" || st.mood === "freude";
+
+        // дыхание
+        const br = Math.sin(t * (glad ? 2.8 : sad ? 1.5 : 1.9)) * (sad ? 0.010 : 0.026);
+        root.scale.set(1 - br * 0.45, 1 + br, 1 - br * 0.35);
+
+        // осанка
+        root.rotation.x = THREE.MathUtils.damp(root.rotation.x, sad ? 0.14 : glad ? -0.05 : 0, 5, dt);
+        root.position.y = THREE.MathUtils.damp(root.position.y, sad ? -0.06 : 0, 4, dt);
+
+        // моргание
+        st.blinkAt -= dt;
+        if (st.blinkAt <= 0) {
+          st.blinkT = 0.12;
+          st.blinkAt = 2.2 + Math.random() * 3.2;
+        }
+        if (st.blinkT > 0) {
+          st.blinkT -= dt;
+          const k = Math.max(0.08, Math.abs(st.blinkT / 0.06 - 1));
+          eyeL.scale.y = eyeR.scale.y = k;
+          gL.scale.y = gR.scale.y = k;
+        } else {
+          eyeL.scale.y = eyeR.scale.y = 1;
+          gL.scale.y = gR.scale.y = 1;
+        }
+
+        // взгляд
+        const lx = THREE.MathUtils.clamp(pointer.x, -1, 1);
+        const ly = THREE.MathUtils.clamp(pointer.y, -1, 1);
+        eyeL.position.x = THREE.MathUtils.damp(eyeL.position.x, -0.31 + lx * 0.05, 6, dt);
+        eyeR.position.x = THREE.MathUtils.damp(eyeR.position.x, 0.31 + lx * 0.05, 6, dt);
+        const ey = 0.2 - ly * 0.045 - (sad ? 0.045 : 0);
+        eyeL.position.y = eyeR.position.y = THREE.MathUtils.damp(eyeL.position.y, ey, 6, dt);
+        gL.position.x = eyeL.position.x + 0.04;
+        gR.position.x = eyeR.position.x + 0.04;
+        gL.position.y = gR.position.y = eyeL.position.y + 0.05;
+
+        // рот
+        mouth.rotation.z = THREE.MathUtils.damp(mouth.rotation.z, Math.PI + (sad ? -0.5 : glad ? 0.1 : 0), 6, dt);
+
+        // поворот
+        spinVel *= 0.94;
+        spin += spinVel;
+        root.rotation.y = THREE.MathUtils.damp(root.rotation.y, spin + lx * 0.1, 6, dt);
+
+        // подскок
+        if (st.hop > 0) {
+          st.hop = Math.max(0, st.hop - dt * 1.7);
+          const k = Math.sin((1 - st.hop) * Math.PI);
+          root.position.y += k * 0.2;
+          root.scale.multiplyScalar(1 + k * 0.035);
+        }
+
+        shadow.scale.setScalar(1 - Math.max(0, root.position.y) * 0.5);
+        shadow.material.opacity = 1 - Math.max(0, root.position.y) * 1.1;
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(tick);
+      }
+      tick();
+    </script>
+  </body>
+</html>

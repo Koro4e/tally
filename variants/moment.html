@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Moment — Partikel</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #08090B; overflow: hidden; }
+  canvas { display: block; }
+  .label {
+    position: fixed; left: 50%; bottom: 9vh; transform: translateX(-50%);
+    font: 600 10px/1 ui-monospace, Consolas, monospace; letter-spacing: .34em;
+    text-transform: uppercase; color: rgba(237,231,218,.55);
+    opacity: 0; transition: opacity .5s ease;
+  }
+  .label.on { opacity: 1; }
+  .hint {
+    position: fixed; left: 50%; top: 4vh; transform: translateX(-50%);
+    font: 500 9px/1 ui-monospace, Consolas, monospace; letter-spacing: .28em;
+    text-transform: uppercase; color: rgba(237,231,218,.22);
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hint">Moment · richtige Antwort</div>
+<div class="label" id="lb">richtig · 9 + 4 − 10 = 3</div>
+
+<script>
+const cvs = document.getElementById("c");
+const ctx = cvs.getContext("2d", { alpha: false });
+const lb = document.getElementById("lb");
+
+let W = 0, H = 0, DPR = 1;
+
+/* ------------------------------------------------------------------ частицы */
+const N = 2800;
+const P = new Array(N).fill(0).map(() => ({
+  x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0,
+  r: Math.random() * 1.6 + 0.5,
+  red: Math.random() < 0.07,
+  a: Math.random() * 0.5 + 0.5,
+}));
+
+/* --------------------------------------------------------- мишень из глифа */
+function glyphPoints(text) {
+  const S = 520;
+  const off = document.createElement("canvas");
+  off.width = off.height = S;
+  const o = off.getContext("2d");
+  o.fillStyle = "#fff";
+  o.font = `800 ${Math.round(S * 0.8)}px system-ui, "Segoe UI", Arial`;
+  o.textAlign = "center";
+  o.textBaseline = "middle";
+  o.fillText(text, S / 2, S / 2 + S * 0.04);
+
+  const d = o.getImageData(0, 0, S, S).data;
+  const pts = [];
+  const step = 4;
+  for (let y = 0; y < S; y += step) {
+    for (let x = 0; x < S; x += step) {
+      if (d[(y * S + x) * 4 + 3] > 128) pts.push([x / S - 0.5, y / S - 0.5]);
+    }
+  }
+  return pts;
+}
+
+let TARGETS = glyphPoints("3");
+let MODE = "form";
+let modeStart = 0;
+
+function resize() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = cvs.width = Math.floor(window.innerWidth * DPR);
+  H = cvs.height = Math.floor(window.innerHeight * DPR);
+  cvs.style.width = window.innerWidth + "px";
+  cvs.style.height = window.innerHeight + "px";
+  ctx.fillStyle = "#08090B";
+  ctx.fillRect(0, 0, W, H);
+  seed();
+}
+
+/* --------------------------------------------------------------- состояние */
+function seed() {
+  for (const p of P) {
+    p.x = Math.random() * W;
+    p.y = Math.random() * H;
+    p.vx = p.vy = 0;
+  }
+  applyForm();
+}
+
+function applyForm() {
+  const scale = Math.min(W, H) * 0.72;
+  for (let i = 0; i < P.length; i++) {
+    const t = TARGETS[i % TARGETS.length];
+    const jx = (Math.random() - 0.5) * 2.2;
+    const jy = (Math.random() - 0.5) * 2.2;
+    P[i].tx = W / 2 + t[0] * scale + jx;
+    P[i].ty = H / 2 + t[1] * scale + jy;
+  }
+}
+
+function applyDrift() {
+  for (const p of P) {
+    p.tx = Math.random() * W;
+    p.ty = Math.random() * H;
+  }
+}
+
+/* ------------------------------------------------------------------- кадр */
+const K = 0.055;      // жёсткость пружины
+const DAMP = 0.9;     // затухание
+let last = performance.now();
+
+function frame(now) {
+  const dt = Math.min(64, now - last);
+  last = now;
+
+  const el = now - modeStart;
+  if (MODE === "form" && el > 2800) {
+    MODE = "drift";
+    modeStart = now;
+    applyDrift();
+    lb.classList.remove("on");
+  } else if (MODE === "drift" && el > 1100) {
+    MODE = "form";
+    modeStart = now;
+    applyForm();
+    lb.classList.add("on");
+  }
+
+  // шлейф вместо полной очистки — главный приём, даёт «смаз»
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "rgba(8,9,11,0.20)";
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.globalCompositeOperation = "lighter";
+  const k = K * (dt / 16.67);
+
+  for (const p of P) {
+    p.vx = (p.vx + (p.tx - p.x) * k) * DAMP;
+    p.vy = (p.vy + (p.ty - p.y) * k) * DAMP;
+    p.x += p.vx;
+    p.y += p.vy;
+
+    const speed = Math.min(1, Math.hypot(p.vx, p.vy) / 6);
+    // «осел» на месте — значит собрался в цифру, светимся сильнее
+    const settled = Math.max(0, 1 - Math.hypot(p.tx - p.x, p.ty - p.y) / 70);
+    if (p.red) {
+      ctx.fillStyle = `rgba(232,64,42,${0.12 + settled * 0.75 + speed * 0.3})`;
+    } else {
+      ctx.fillStyle = `rgba(237,231,218,${0.05 + settled * 0.55 * p.a + speed * 0.25})`;
+    }
+    const r = p.r * DPR;
+    ctx.fillRect(p.x, p.y, r, r);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener("resize", resize);
+resize();
+modeStart = performance.now();
+lb.classList.add("on");
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
