@@ -15,13 +15,21 @@ import { setMascot, useMascot } from "./store";
    показа — временное (под карточкой «Сегодня»), компонент самодостаточный.
    ========================================================================== */
 
-export default function MascotPicker({ className }: { className?: string }) {
+export default function MascotPicker({
+  className,
+  noTitle = false,
+}: {
+  className?: string;
+  noTitle?: boolean;
+}) {
   const cur = useMascot();
   return (
     <div className={cn("card3d rounded-card border-2 border-line bg-white p-4", className)}>
-      <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
-        Dein Maskottchen
-      </p>
+      {!noTitle && (
+        <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
+          Dein Maskottchen
+        </p>
+      )}
       <div className="grid grid-cols-5 gap-2">
         {CHARACTERS.map((ch) => {
           const on = ch.id === cur;
@@ -36,7 +44,7 @@ export default function MascotPicker({ className }: { className?: string }) {
               aria-pressed={on}
               className={cn(
                 "btn3d flex flex-col items-center rounded-xl border-2 bg-white px-0.5 pt-2 pb-1.5",
-                on ? "border-green" : "border-line hover:bg-[#fafafa]",
+                on ? "border-green" : "border-line hover:bg-bg",
               )}
               style={on ? ({ "--btn-shadow": "var(--color-greend)" } as CSSProperties) : undefined}
             >

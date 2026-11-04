@@ -370,7 +370,7 @@ export default function Exam({
           <p
             className={cn(
               "text-[10px] font-extrabold uppercase tracking-[0.14em]",
-              passed ? "text-[#2f6b00]" : "text-red",
+              passed ? "text-greend" : "text-red",
             )}
           >
             {passed ? "Bestanden" : "Nicht bestanden"}
@@ -379,7 +379,7 @@ export default function Exam({
             <span
               className={cn(
                 "tnum text-[42px] leading-none font-extrabold",
-                passed ? "text-[#2f6b00]" : "text-red",
+                passed ? "text-greend" : "text-red",
               )}
             >
               {result.pts}

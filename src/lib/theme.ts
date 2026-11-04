@@ -1,6 +1,7 @@
 /* ============================================================================
-   ТЕМА: auto (по системе) / dark / light. Хранится в localStorage
-   "tally.theme". Дефолт — auto. data-theme на <html> ставит CSS-блоки
+   ТЕМА: light (по умолчанию) / dark / auto. Хранится в localStorage
+   "tally.theme". Дефолт — светлая (решение хозяина: белый дефолт,
+   «Системная» — осознанный выбор в настройках, а не стартовое состояние). data-theme на <html> ставит CSS-блоки
    из index.css; JS резолвит auto сразу при загрузке, чтобы не мигало.
    ========================================================================== */
 
@@ -17,9 +18,9 @@ function read(): ThemeMode {
     const v = localStorage.getItem(KEY);
     if (v === "dark" || v === "light" || v === "auto") return v;
   } catch {
-    /* приватный режим — auto */
+    /* приватный режим — светлая */
   }
-  return "auto";
+  return "light";
 }
 
 export function getTheme(): ThemeMode {

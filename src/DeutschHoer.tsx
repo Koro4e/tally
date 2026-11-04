@@ -375,9 +375,9 @@ export default function DeutschHoer({
     setSnap(`${c} / ${n}`);
   };
 
-  if (section === "diktat") return <div className="mx-auto w-full max-w-[640px] px-4 py-5"><DiktatRun set={HOER_SETS[variant]} onBack={() => setSection(null)} onFinish={finish} />{snap && <p className="mt-3 text-center text-[12px] font-extrabold text-muted">Ergebnis: {snap}</p>}</div>;
-  if (section === "mc") return <div className="mx-auto w-full max-w-[640px] px-4 py-5"><McRun set={HOER_SETS[variant]} onBack={() => setSection(null)} onFinish={finish} />{snap && <p className="mt-3 text-center text-[12px] font-extrabold text-muted">Ergebnis: {snap}</p>}</div>;
-  if (section === "dialogs") return <div className="mx-auto w-full max-w-[640px] px-4 py-5"><DialogRun set={HOER_SETS[variant]} onBack={() => setSection(null)} onFinish={finish} />{snap && <p className="mt-3 text-center text-[12px] font-extrabold text-muted">Ergebnis: {snap}</p>}</div>;
+  if (section === "diktat") return <div className="mx-auto w-full max-w-[680px] px-4 py-5"><DiktatRun set={HOER_SETS[variant]} onBack={() => setSection(null)} onFinish={finish} />{snap && <p className="mt-3 text-center text-[12px] font-extrabold text-muted">Ergebnis: {snap}</p>}</div>;
+  if (section === "mc") return <div className="mx-auto w-full max-w-[680px] px-4 py-5"><McRun set={HOER_SETS[variant]} onBack={() => setSection(null)} onFinish={finish} />{snap && <p className="mt-3 text-center text-[12px] font-extrabold text-muted">Ergebnis: {snap}</p>}</div>;
+  if (section === "dialogs") return <div className="mx-auto w-full max-w-[680px] px-4 py-5"><DialogRun set={HOER_SETS[variant]} onBack={() => setSection(null)} onFinish={finish} />{snap && <p className="mt-3 text-center text-[12px] font-extrabold text-muted">Ergebnis: {snap}</p>}</div>;
 
   const cards: { id: HoerSection; de: string; ru: string; pts: string }[] = [
     { id: "diktat", de: "1.1 Diktat", ru: "Два прочтения, 13 пропусков", pts: "13 P" },
@@ -385,7 +385,7 @@ export default function DeutschHoer({
     { id: "dialogs", de: "1.3 Dialoge", ru: "3 диалога по 2 вопроса", pts: "6 P" },
   ];
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+    <div className="mx-auto w-full max-w-[680px] px-4 py-5">
       <div className="flex items-center gap-3">
         <button type="button" onClick={onBack} className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted hover:text-ink">
           ← Prüfung

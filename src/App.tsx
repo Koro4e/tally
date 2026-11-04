@@ -31,6 +31,7 @@ import Pruefung from "@/Pruefung";
 import Vocab from "@/Vocab";
 import TopicPruefung from "@/TopicPruefung";
 import DeutschExam from "@/DeutschExam";
+import PageHeader from "@/PageHeader";
 
 /* подставляется сборкой (см. define в vite.config.ts) */
 declare const __BUILD__: string;
@@ -267,6 +268,11 @@ export default function App() {
             {matheView === "weg" ? (
               view === "weg" ? (
                 <>
+                  <PageHeader
+                    kicker="Mathematik"
+                    title="Der Weg"
+                    sub="Один узел за раз: тренажёр → контрольная → Prüfung темы. Так путь ведёт до самого экзамена."
+                  />
                   <NextUp m={m} onPick={pickSkill} />
                   <Weg m={m} mv={mv} onPick={pickSkill} onKontrolle={setKontrolle} onMix={() => setMix(true)} />
                 </>
@@ -283,7 +289,7 @@ export default function App() {
           </div>
         </div>
       ) : (
-        <div className="mx-auto w-full max-w-[720px] px-4 lg:px-0">
+        <div className="mx-auto w-full max-w-[680px] px-4 lg:px-0">
           {/* Deutsch — та же центрированная колонна */}
           <div className="lg:hidden">
             <SubBar
@@ -422,7 +428,7 @@ function ShellSidebar({
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r-2 border-line bg-white px-4 pt-5 pb-4 lg:flex">
       <div className="flex items-baseline gap-2 px-1">
         <span className="text-[20px] font-extrabold tracking-[-0.02em] text-green">TALLY</span>
-        <span className="text-[9px] font-bold text-[#cfcfcf]">{__BUILD__}</span>
+        <span className="text-[9px] font-bold text-muted/60">{__BUILD__}</span>
       </div>
 
       <nav className="mt-6 space-y-1" aria-label="Предметы">
@@ -523,7 +529,7 @@ function ShellHeader({
     <header className="sticky top-0 z-20 bg-bg lg:hidden">
       <div className="mx-auto flex max-w-[880px] items-center gap-3 px-4 pt-4 pb-1 lg:px-6">
         <span className="text-[19px] font-extrabold tracking-[-0.02em] text-green">TALLY</span>
-        <span className="text-[9px] font-bold text-[#cfcfcf]">{__BUILD__}</span>
+        <span className="text-[9px] font-bold text-muted/60">{__BUILD__}</span>
         <button
           type="button"
           aria-pressed={snd}
@@ -537,7 +543,7 @@ function ShellHeader({
           }}
           className={cn(
             "ml-auto rounded-lg p-1.5 transition-colors hover:bg-black/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue",
-            snd ? "text-green" : "text-[#d4d4d4]",
+            snd ? "text-green" : "text-muted/60",
           )}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
@@ -669,7 +675,7 @@ function NextUp({ m, onPick }: { m: M; onPick: (s: Skill) => void }) {
   const cur = useMemo(() => current(m), [m]);
   if (!cur) return null;
   return (
-    <div className="card3d mb-4 rounded-card border-2 border-green bg-white p-4">
+    <div className="card3d mb-4 mt-8 rounded-card border-2 border-green bg-white p-4">
       <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-green">
         Jetzt dran
       </p>
@@ -711,9 +717,9 @@ function Einstellungen({ onBack }: { onBack: () => void }) {
       >
         ← Назад
       </button>
-      <h1 className="mt-3 text-[24px] font-extrabold tracking-[-0.01em]">Настройки</h1>
+      <PageHeader kicker="Tally" title="Настройки" sub="Тема, зверёк и звук." />
 
-      <section className="card3d mt-4 rounded-card border-2 border-line bg-white p-4">
+      <section className="card3d mt-8 rounded-card border-2 border-line bg-white p-4">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Тема</p>
         <div className="mt-2 flex gap-2">
           {modes.map((x) => (
@@ -735,12 +741,12 @@ function Einstellungen({ onBack }: { onBack: () => void }) {
         </div>
       </section>
 
-      <section className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+      <section className="card3d mt-6 rounded-card border-2 border-line bg-white p-4">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Маскот</p>
-        <MascotPicker className="mt-2 border-0 p-0 shadow-none" />
+        <MascotPicker noTitle className="mt-2 border-0 p-0 shadow-none" />
       </section>
 
-      <section className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+      <section className="card3d mt-6 rounded-card border-2 border-line bg-white p-4">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-extrabold">Звук</p>
           <button
@@ -879,7 +885,7 @@ function Weg({
   }, []);
 
   return (
-    <main className="mx-auto flex max-w-[430px] flex-col px-4 pt-4 lg:max-w-[600px] lg:px-0">
+    <main className="mx-auto flex max-w-[430px] flex-col lg:max-w-[600px]">
       {/* на телефоне сверху — только серия и цель дня (канон: один экран —
           одна цель); смена маскота — украшение, уезжает под дерево */}
       <div className="mb-4 lg:hidden">
@@ -947,7 +953,7 @@ function Weg({
         );
       })}
 
-      <p className="mb-6 text-center text-[11px] leading-snug font-bold text-[#c2c2c2]">
+      <p className="mb-6 text-center text-[11px] leading-snug font-bold text-muted/70">
         {(() => {
           const noTrainer = SKILLS.filter((s) => !s.gen.length).length;
           return noTrainer > 0
@@ -1061,10 +1067,10 @@ function Node({
           "relative grid shrink-0 place-items-center transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue",
           combo ? "rotate-45 rounded-[18px]" : "rounded-full",
           cur && "bg-green text-white shadow-[0_4px_0_var(--color-greend)]",
-          !cur && st === "mastered" && "bg-gold text-white shadow-[0_4px_0_#e0a800]",
-          !cur && st === "review" && "bg-blue text-white shadow-[0_4px_0_#1899d6]",
+          !cur && st === "mastered" && "bg-gold text-white shadow-[0_4px_0_var(--color-goldd)]",
+          !cur && st === "review" && "bg-blue text-white shadow-[0_4px_0_var(--color-blued)]",
           !cur && st === "open" && "border-2 border-green bg-white text-green shadow-[0_4px_0_var(--color-line)]",
-          st === "locked" && "border-2 border-[#dcdcdc] bg-[#ececec] shadow-[0_4px_0_var(--color-line)]",
+          st === "locked" && "border-2 border-line bg-line/40 shadow-[0_4px_0_var(--color-line)]",
           st === "notrainer" &&
             (combo
               ? "border-2 border-dashed border-gold bg-transparent"
@@ -1096,7 +1102,7 @@ function Node({
             <span className="h-2.5 w-2.5 rounded-full bg-green" />
           ) : st === "locked" ? (
             /* замок: серый кружок без значка не читался как «заперто» */
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a9a9a9" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-muted)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <rect x="4" y="10.5" width="16" height="10" rx="2.5" />
               <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
             </svg>
@@ -1111,8 +1117,8 @@ function Node({
           cur
             ? "text-ink"
             : st === "notrainer" || st === "locked"
-              ? "text-[#a3a3a3]"
-              : "text-[#8a8a8a]",
+              ? "text-muted/70"
+              : "text-muted/70",
         )}
       >
         {s.de}
@@ -1122,7 +1128,7 @@ function Node({
         <span
           className={cn(
             "tnum mt-0.5 rounded bg-bg px-1 text-[9px] font-extrabold tracking-[0.04em]",
-            cur ? "text-greend" : "text-[#b5b5b5]",
+            cur ? "text-greend" : "text-muted/60",
           )}
         >
           {cov} Proben
@@ -1138,16 +1144,18 @@ function Programm({ m }: { m: M }) {
   const combos = SKILLS.filter((s) => s.kind === "combo");
 
   return (
-    <main className="mx-auto max-w-[430px] px-4 pt-4 lg:px-0">
-      <p className="text-[12px] leading-relaxed font-semibold text-muted">
-        Nur zum Nachsehen. Gelernt wird auf dem Weg — hier kann man nichts anklicken.
-      </p>
+    <main className="mx-auto max-w-[430px]">
+      <PageHeader
+        kicker="Mathematik"
+        title="Programm"
+        sub="Nur zum Nachsehen. Gelernt wird auf dem Weg — hier kann man nichts anklicken."
+      />
 
       {BRANCHES.map((b) => {
         const items = SKILLS.filter((s) => s.branch === b.id && s.kind === "atom");
         if (!items.length) return null;
         return (
-          <section key={b.id} className="mt-5">
+          <section key={b.id} className="mt-8">
             <h2 className="mb-2 flex items-baseline gap-2 text-[13px] font-extrabold">
               {b.de}
               <span className="text-[11px] font-bold text-muted">{b.ru}</span>
@@ -1161,7 +1169,7 @@ function Programm({ m }: { m: M }) {
         );
       })}
 
-      <section className="mt-5">
+      <section className="mt-8">
         <h2 className="mb-2 flex items-baseline gap-2 text-[13px] font-extrabold">
           Kombinationen
           <span className="text-[11px] font-bold text-gold">{combos.length}</span>

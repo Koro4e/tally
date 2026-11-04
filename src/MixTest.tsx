@@ -139,7 +139,7 @@ export default function MixTest({
 
   if (tasks && tasks.length < 4) {
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-10">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-10">
         <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
           <p className="text-[13px] font-bold text-muted">
             В банке пока мало задач под твою смесь узлов — Mix собирать не из чего.
@@ -159,7 +159,7 @@ export default function MixTest({
 
   if (!tasks) {
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-10">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-10">
         <p className="text-[13px] font-bold text-muted">Mix wird gemischt …</p>
       </div>
     );
@@ -167,7 +167,7 @@ export default function MixTest({
 
   if (done) {
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-10">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-10">
         <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
             Mix-Runde · всё вперемешку
@@ -221,7 +221,7 @@ export default function MixTest({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+    <div className="mx-auto w-full max-w-[680px] px-4 py-5">
       <div className="mb-3 flex items-center gap-3">
         <button
           type="button"

@@ -8,6 +8,7 @@
 
 import { lastExam } from "@/Exam";
 import { BRANCHES, type Branch } from "@/lib/skills";
+import PageHeader from "@/PageHeader";
 
 function Kicker({ children }: { children: React.ReactNode }) {
   return (
@@ -29,9 +30,13 @@ export default function Pruefung({
   const last = lastExam();
 
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 pt-1 pb-5">
-      <div className="card3d rounded-card border-2 border-line bg-white p-4">
-        <Kicker>Mathematik · Probeprüfung</Kicker>
+    <div className="mx-auto w-full max-w-[680px] px-4 py-6">
+      <PageHeader
+        kicker="Mathematik"
+        title="Prüfung"
+        sub="Probeprüfung целиком, Mix-раунды и контрольные по разделам пути."
+      />
+      <div className="card3d mt-8 rounded-card border-2 border-line bg-white p-4">
         <button
           type="button"
           onClick={onExam}

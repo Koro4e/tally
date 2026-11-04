@@ -14,6 +14,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/utils/cn";
+import PageHeader from "@/PageHeader";
 import { LESEN, type LesenText } from "@/lib/de/exam-lesen";
 import { LUECK, type LueckText } from "@/lib/de/exam-lueck";
 import { SCHREIBEN, type SchreibenAufgabe } from "@/lib/de/exam-schreiben";
@@ -659,7 +660,7 @@ export default function DeutschExam({
   if (part?.id === "lesen") {
     const t = LESEN[lesenIdx % LESEN.length];
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6">
         <LesenRun
           key={`lesen-${lesenIdx}`}
           text={t}
@@ -676,7 +677,7 @@ export default function DeutschExam({
 
   if (part?.id === "grammatik") {
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6">
         <GrammRun
           key={"gramm-" + grammSeed}
           items={grammItems}
@@ -688,7 +689,7 @@ export default function DeutschExam({
 
   if (part?.id === "stufe") {
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6">
         <StufeRun onBack={() => setPart(null)} onXp={onXp} />
       </div>
     );
@@ -696,7 +697,7 @@ export default function DeutschExam({
 
   if (part?.id === "hoer") {
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6">
         <DeutschHoer onXp={onXp} onBack={() => setPart(null)} />
       </div>
     );
@@ -705,7 +706,7 @@ export default function DeutschExam({
   if (part?.id === "schreiben") {
     const t = SCHREIBEN[schreibenIdx % SCHREIBEN.length];
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6">
         <SchreibenRun
           key={"schreiben-" + schreibenIdx}
           aufgabe={t}
@@ -723,7 +724,7 @@ export default function DeutschExam({
   if (part?.id === "lueck") {
     const t = LUECK[lueckIdx % LUECK.length];
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6">
         <LueckRun
           key={`lueck-${lueckIdx}`}
           text={t}
@@ -739,7 +740,7 @@ export default function DeutschExam({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+    <div className="mx-auto w-full max-w-[680px] px-4 py-6">
       {!embedded && (
         <div className="flex items-center gap-3">
           <button
@@ -751,14 +752,13 @@ export default function DeutschExam({
           </button>
         </div>
       )}
-      <h1 className={cn("text-[26px] leading-none font-extrabold tracking-[-0.01em]", embedded ? "" : "mt-3")}>
-        {embedded ? "Deutsch-Prüfung" : "Prüfung"}
-      </h1>
-      <p className="mt-1 text-[12px] font-semibold text-muted">
-        Все 100 баллов немецкого экзамена закрыты в приложении
-      </p>
+      <PageHeader
+        kicker="Deutsch"
+        title={embedded ? "Deutsch-Prüfung" : "Prüfung"}
+        sub="Все 100 баллов немецкого экзамена закрыты в приложении"
+      />
 
-      <div className="mt-4 space-y-1.5">
+      <div className="mt-8 space-y-1.5">
         {PARTS.map((p) => (
           <button
             key={p.id}
@@ -784,7 +784,7 @@ export default function DeutschExam({
       {part === null && (
         <div className="mt-4">
           <Kicker>Text wählen</Kicker>
-          <div className="mt-2 flex gap-1.5">
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
             {LESEN.map((t, i) => (
               <button
                 key={i}
@@ -800,7 +800,7 @@ export default function DeutschExam({
               </button>
             ))}
           </div>
-          <div className="mt-1.5 flex gap-1.5">
+          <div className="mt-1.5 grid grid-cols-2 gap-1.5">
             {SCHREIBEN.map((t, i) => (
               <button
                 key={i}
@@ -816,7 +816,7 @@ export default function DeutschExam({
               </button>
             ))}
           </div>
-          <div className="mt-1.5 flex gap-1.5">
+          <div className="mt-1.5 grid grid-cols-2 gap-1.5">
             {LUECK.map((t, i) => (
               <button
                 key={i}
@@ -922,7 +922,7 @@ function StufeRun({
         <p className="mt-1 text-[12px] font-semibold text-muted">
           {STUFE_N} заданий из генераторов уровня · {mmss(STUFE_SEC)} · зачёт от 80 %
         </p>
-        <div className="mt-4 space-y-1.5">
+        <div className="mt-8 space-y-1.5">
           {(["A1", "A2", "B1", "B2", "C1"] as Level[]).map((lv) => {
             const last = hist[lv]?.[0];
             const ready = byLevel(lv).filter((t) => drillable(t) && t.gen.length > 0).length;

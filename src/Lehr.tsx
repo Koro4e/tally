@@ -152,7 +152,7 @@ export default function Lehr({
         <>
           {/* формула — главное на экране, крупно и по центру */}
           <div className="card3d mt-4 rounded-card border-2 border-green bg-greenl px-4 py-4 text-center">
-            <p className="tnum text-[clamp(19px,4.6vw,26px)] leading-[1.35] font-extrabold break-words text-[#2f6b00]">
+            <p className="tnum text-[clamp(19px,4.6vw,26px)] leading-[1.35] font-extrabold break-words text-greend">
               <MathText>{card.formel}</MathText>
             </p>
           </div>
@@ -212,7 +212,7 @@ export default function Lehr({
               {card.beispiel.schritte.slice(0, steps).map((s, i) => (
                 <li
                   key={i}
-                  className="flex gap-2.5 rounded-lg bg-[#fafafa] px-2.5 py-2 text-[13px] leading-[1.5] font-semibold"
+                  className="flex gap-2.5 rounded-lg bg-bg px-2.5 py-2 text-[13px] leading-[1.5] font-semibold"
                 >
                   <span className="tnum mt-[1px] shrink-0 text-[10px] font-extrabold text-muted">
                     {i + 1}
@@ -236,10 +236,10 @@ export default function Lehr({
 
             {done && (
               <div className="mt-3 flex items-center justify-between rounded-lg border-2 border-green bg-greenl px-3 py-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#2f6b00]">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-greend">
                   Ergebnis
                 </span>
-                <span className="tnum text-[17px] font-extrabold text-[#2f6b00]">
+                <span className="tnum text-[17px] font-extrabold text-greend">
                   <MathText>{card.beispiel.ergebnis}</MathText>
                 </span>
               </div>

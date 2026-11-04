@@ -20,6 +20,7 @@
 
 import { useState } from "react";
 import { cn } from "@/utils/cn";
+import PageHeader from "@/PageHeader";
 import { judge, norm } from "@/lib/de/gen";
 import type { Snap } from "@/lib/motivation";
 import {
@@ -361,7 +362,7 @@ export default function Vocab({
     const answer = ex ? (ex.dir === "ru-de" ? ex.w.de : ex.w.ru) : "";
 
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6">
         <div className="mb-3 flex items-center gap-3">
           <button
             type="button"
@@ -548,13 +549,14 @@ export default function Vocab({
   /* --- главный экран словаря --- */
 
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-5">
-      <h1 className="text-[26px] leading-none font-extrabold tracking-[-0.01em]">Wortschatz</h1>
-      <p className="mt-1 text-[12px] font-semibold text-muted">
-        Словарь с повторениями · каждый заход — до {NEW_PER_DAY} новых слов, ошибка возвращает слово в начало
-      </p>
+    <div className="mx-auto w-full max-w-[680px] px-4 py-6">
+      <PageHeader
+        kicker="Deutsch"
+        title="Wortschatz"
+        sub={`Словарь с повторениями · каждый заход — до ${NEW_PER_DAY} новых слов, ошибка возвращает слово в начало`}
+      />
 
-      <div className="mt-4 flex gap-1.5">
+      <div className="mt-8 flex gap-1.5">
         {TABS.map((lv) => (
           <button
             key={lv}
@@ -572,7 +574,7 @@ export default function Vocab({
         ))}
       </div>
 
-      <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d mt-6 rounded-card border-2 border-line bg-white p-4">
         <div className="flex items-baseline justify-between">
           <p className="text-[13px] font-extrabold">
             Закреплено {stat.known} из {stat.total}

@@ -20,6 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
+import PageHeader from "@/PageHeader";
 import {
   EXAM_CORE,
   LEVELS,
@@ -288,7 +289,7 @@ function Theorie({
 }) {
   const t = hasTheory(topic.id) ? THEORY[topic.id] : null;
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+    <div className="mx-auto w-full max-w-[680px] px-4 py-6">
       <button
         type="button"
         onClick={onBack}
@@ -544,7 +545,7 @@ function Runde({
 
   if (!cur) {
     return (
-      <div className="mx-auto w-full max-w-[640px] px-4 py-10">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-10">
         <p className="text-[13px] font-bold text-muted">Задания не собрались.</p>
         <button type="button" onClick={onBack} className="mt-3 text-[12px] font-extrabold text-blue">
           ← назад
@@ -570,7 +571,7 @@ function Runde({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-5">
+    <div className="mx-auto w-full max-w-[680px] px-4 py-6">
       <div className="mb-3 flex items-center gap-3">
         <button
           type="button"
@@ -780,7 +781,7 @@ function Fertig({
   /* маскот празднует зачёт и грустит на незачёте — паритет с финалом тютора */
   const mascot = useMascot();
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-10">
+    <div className="mx-auto w-full max-w-[680px] px-4 py-10">
       <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
         <Mascot
           char={mascot}
@@ -841,7 +842,7 @@ const STATUS_DOT: Record<string, string> = {
   mastered: "bg-green",
   review: "bg-gold",
   open: "bg-blue",
-  locked: "bg-[#dcdcdc]",
+  locked: "bg-line/40",
   soon: "bg-line",
 };
 
@@ -966,21 +967,14 @@ export default function Deutsch({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-5">
-      <div className="flex items-center gap-3">
-        <span className="ml-auto tnum text-[11px] font-extrabold text-muted">
-          {level}: пройдено {levelStats.done} из {levelStats.total} · всего {counts.done}/{
-            counts.total
-          }
-        </span>
-      </div>
+    <div className="mx-auto w-full max-w-[680px] px-4 py-6">
+      <PageHeader
+        kicker="Deutsch"
+        title="Grammatik"
+        sub="A1–C1 · экзамен 09.01.2027 · задания 3.1–3.4 дают 30 из 100 баллов"
+      />
 
-      <h1 className="mt-3 text-[26px] leading-none font-extrabold tracking-[-0.01em]">Deutsch</h1>
-      <p className="mt-1 text-[12px] font-semibold text-muted">
-        Grammatik A1–C1 · экзамен 09.01.2027 · задания 3.1–3.4 дают 30 из 100 баллов
-      </p>
-
-      <div className="mt-4 flex gap-1.5">
+      <div className="mt-8 flex gap-1.5">
         {LEVELS.map((lv) => (
           <button
             key={lv}
@@ -997,6 +991,9 @@ export default function Deutsch({
           </button>
         ))}
       </div>
+      <p className="tnum mt-2 text-right text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
+        {level}: пройдено {levelStats.done} из {levelStats.total} · всего {counts.done}/{counts.total}
+      </p>
 
       {cur && (
         <div className="card3d mt-3 rounded-card border-2 border-green bg-white p-4">

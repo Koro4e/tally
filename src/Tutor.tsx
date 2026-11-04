@@ -742,7 +742,7 @@ export default function Tutor({
                 placeholder="Antwort"
                 autoComplete="off"
                 spellCheck={false}
-                className="tnum min-w-0 flex-1 rounded-xl border-2 border-line bg-white px-4 py-3.5 text-[21px] font-extrabold outline-none placeholder:text-[11px] placeholder:font-extrabold placeholder:uppercase placeholder:tracking-[0.12em] placeholder:text-muted focus:border-blue disabled:bg-[#fafafa]"
+                className="tnum min-w-0 flex-1 rounded-xl border-2 border-line bg-white px-4 py-3.5 text-[21px] font-extrabold outline-none placeholder:text-[11px] placeholder:font-extrabold placeholder:uppercase placeholder:tracking-[0.12em] placeholder:text-muted focus:border-blue disabled:bg-bg"
               />
               <button
                 type="button"
@@ -818,7 +818,7 @@ export default function Tutor({
                 с задачей не сдвигается ни на пиксель */}
             <div className="mt-4 h-[300px] overflow-y-auto" aria-live="polite">
               {verdict === null && (
-                <p className="pt-1 text-[11px] font-bold text-[#c2c2c2]">
+                <p className="pt-1 text-[11px] font-bold text-muted/70">
                   Enter prüft die Antwort. Zahl oder Bruch, z. B. −5/12.
                 </p>
               )}
@@ -937,7 +937,7 @@ export default function Tutor({
 
 const URTEIL: Record<RoundResult["urteil"], { de: string; cls: string }> = {
   verstanden: { de: "verstanden", cls: "bg-greenl text-greend border-green" },
-  wackelt: { de: "wackelt", cls: "bg-[#fff8e1] text-[#8a6a00] border-gold" },
+  wackelt: { de: "wackelt", cls: "bg-gold/15 text-ink border-gold" },
   nicht: { de: "nicht verstanden", cls: "bg-redl text-red border-red" },
   unbekannt: { de: "ohne Urteil", cls: "bg-black/[0.03] text-muted border-line" },
 };

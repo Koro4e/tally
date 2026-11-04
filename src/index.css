@@ -384,14 +384,6 @@ sup {
 :root[data-theme="dark"] .btn3d-white:hover { background-color: #273449; }
 :root[data-theme="dark"] .bg-greenl { background-color: var(--color-greenl); }
 :root[data-theme="dark"] .hover\:bg-black\/\[0\.04\]:hover { background-color: rgba(255, 255, 255, 0.06); }
-:root[data-theme="dark"] .bg-\[\#fafafa\] { background-color: #172033; }
-:root[data-theme="dark"] .bg-\[\#f7f7f7\] { background-color: #172033; }
-:root[data-theme="dark"] .bg-\[\#ececec\] { background-color: #273449; }
-:root[data-theme="dark"] .border-\[\#dcdcdc\] { border-color: var(--color-line); }
-:root[data-theme="dark"] .text-\[\#c2c2c2\] { color: #6b7f8a; }
-:root[data-theme="dark"] .text-\[\#cfcfcf\] { color: #5c6f79; }
-:root[data-theme="dark"] .text-\[\#d4d4d4\] { color: #5c6f79; }
-:root[data-theme="dark"] .text-\[\#afafaf\] { color: #8fa1ab; }
 :root[data-theme="dark"] .bg-\[\#d7ffb8\] { background-color: #064e3b; }
 :root[data-theme="dark"] .bg-\[\#ffdfe0\] { background-color: #3f1d24; }
 :root[data-theme="dark"] .bg-gold\/15 { background-color: rgba(255, 200, 0, 0.12); }
