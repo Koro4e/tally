@@ -440,13 +440,21 @@ h1 {
 @keyframes mv { to { stroke-dashoffset: -16; } }
 @keyframes bob { 50% { transform: translateY(-4px); } }
 
-/* карточка «Jetzt dran» — единственная залитая акцентом (как .jd в макете) */
+/* карточка «Jetzt dran» — единственная залитая акцентом (как .jd в макете):
+   блик следует за курсором (--mx/--my), сама карточка наклоняется в 3D
+   (React-обработчик пишет --rx/--ry/--mx/--my) */
 .jd {
   background:
-    radial-gradient(120% 140% at 100% 0, #ffffff30, transparent 55%),
+    radial-gradient(120% 140% at var(--mx, 100%) var(--my, 0), #ffffff38, transparent 55%),
     var(--acc);
   color: var(--on);
   border: 0;
   box-shadow: 0 5px 0 var(--ac2);
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.25s var(--ease);
 }
 .jd p { color: inherit; opacity: 0.85; }
+
+/* счётчик «подпрыгивает», когда в него прилетает звезда за пройденный узел */
+@keyframes bump { 50% { transform: scale(1.4); } }
+.bump { animation: bump 0.4s var(--spring); }

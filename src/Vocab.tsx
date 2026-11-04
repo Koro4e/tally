@@ -567,7 +567,7 @@ export default function Vocab({
         onChange={(lv) => setLevel(lv as typeof TABS[number])}
       />
 
-      <div className="card3d mt-6 rounded-card border border-line bg-card p-4">
+      <div className="card3d mt-6 rounded-card border border-line bg-card p-4 lg:p-6">
         <div className="flex items-baseline justify-between">
           <p className="text-[13px] font-extrabold">
             Закреплено {stat.known} из {stat.total}
@@ -588,7 +588,7 @@ export default function Vocab({
       </div>
 
       {level === "MEINE" && (
-        <div key={cv} className="card3d mt-3 rounded-card border border-line bg-card p-4">
+        <div key={cv} className="card3d mt-3 rounded-card border border-line bg-card p-4 lg:p-6">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
             Свои слова · из Lesen «не знаю» и ручного ввода
           </p>

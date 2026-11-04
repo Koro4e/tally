@@ -36,7 +36,7 @@ export default function Pruefung({
         title="Prüfung"
         sub="Probeprüfung целиком, Mix-раунды и контрольные по разделам пути."
       />
-      <div className="card3d mt-8 rounded-card border border-line bg-card p-4">
+      <div className="card3d mt-8 rounded-card border border-line bg-card p-4 lg:p-6">
         <button
           type="button"
           onClick={onExam}

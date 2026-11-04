@@ -168,7 +168,7 @@ function LesenRun({
         </span>
       </div>
 
-      <div className="card3d rounded-card border border-line bg-card p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4 lg:p-6">
         <Kicker>{text.title} · {text.rubrik}</Kicker>
         <button
           type="button"
@@ -399,7 +399,7 @@ function SchreibenRun({
         <span className="ml-auto text-[11px] font-extrabold text-muted">{aufgabe.title}</span>
       </div>
 
-      <div className="card3d rounded-card border border-line bg-card p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4 lg:p-6">
         <Kicker>Bildergeschichte · 6 Bilder</Kicker>
         <p className="mt-2 text-[12px] leading-[1.55] font-semibold text-muted">{aufgabe.intro}</p>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -413,7 +413,7 @@ function SchreibenRun({
         </div>
       </div>
 
-      <div className="card3d rounded-card border border-line bg-card p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4 lg:p-6">
         <Kicker>Deine Geschichte · {words} Wörter</Kicker>
         <textarea
           value={text}
@@ -425,7 +425,7 @@ function SchreibenRun({
         />
       </div>
 
-      <div className="card3d rounded-card border border-line bg-card p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4 lg:p-6">
         <Kicker>Selbstkontrolle — честно: экзаменатор проверяет именно это</Kicker>
         <div className="mt-2 space-y-1.5">
           {aufgabe.checklist.map((c, i) => (

@@ -100,7 +100,7 @@ function DiktatRun({ set, onBack, onFinish }: { set: HoerVariant; onBack: () => 
       </p>
       <Audio src={set.audio.diktat} label="Einmal hören — слушай и пиши сразу" />
 
-      <div className="card3d rounded-card border border-line bg-card p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4 lg:p-6">
         <Kicker>({checked ? correct : "—"} / {d.answers.length})</Kicker>
         <p className="mt-2 text-[14px] leading-[2.2] font-bold">
           {parts.map((p, k) => {

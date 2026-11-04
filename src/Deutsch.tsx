@@ -986,7 +986,22 @@ export default function Deutsch({
       </p>
 
       {cur && (
-        <div className="jd mt-6 rounded-card p-5">
+        <div
+          className="jd mt-6 rounded-card p-5"
+          onMouseMove={(e) => {
+            const r = e.currentTarget.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width;
+            const y = (e.clientY - r.top) / r.height;
+            e.currentTarget.style.setProperty("--ry", (x - 0.5) * 8 + "deg");
+            e.currentTarget.style.setProperty("--rx", (0.5 - y) * 6 + "deg");
+            e.currentTarget.style.setProperty("--mx", x * 100 + "%");
+            e.currentTarget.style.setProperty("--my", y * 100 + "%");
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.setProperty("--rx", "0deg");
+            e.currentTarget.style.setProperty("--ry", "0deg");
+          }}
+        >
           <div className="flex items-baseline justify-between">
             <Kicker>Jetzt dran</Kicker>
             <span className="text-[10px] font-extrabold">

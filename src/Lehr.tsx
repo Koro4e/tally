@@ -200,7 +200,7 @@ export default function Lehr({
           )}
 
           {/* пример по шагам: шаг открывается кнопкой, а не вываливается сразу */}
-          <div className="card3d mt-4 rounded-card border border-line bg-card p-4">
+          <div className="card3d mt-4 rounded-card border border-line bg-card p-4 lg:p-6">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
               Beispiel
             </p>

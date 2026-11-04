@@ -526,7 +526,7 @@ export default function Exam({
       </header>
 
       <main className="mx-auto flex w-full max-w-[560px] flex-1 flex-col px-4 py-5">
-        <div className="card3d rounded-card border border-line bg-card p-4">
+        <div className="card3d rounded-card border border-line bg-card p-4 lg:p-6">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
             {items[idx]?.b.de ?? ""} · {items[idx]?.b.pts ?? 1} Punkte
           </p>

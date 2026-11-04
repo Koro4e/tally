@@ -611,7 +611,7 @@ function ShellHeader({
           <div className="mx-auto flex max-w-[880px] items-center gap-2 px-4 pb-2 text-[11px] font-bold text-muted lg:hidden">
             <span className="tnum">{daysLeft()} Tage bis Prüfung</span>
             <span className="tnum ml-auto">
-              {c.done} / {c.total} Knoten
+              <span data-xp-target className="inline-block">{c.done}</span> / {c.total} Knoten
             </span>
             <button
               type="button"
@@ -681,7 +681,22 @@ function NextUp({ m, onPick }: { m: M; onPick: (s: Skill) => void }) {
   const cur = useMemo(() => current(m), [m]);
   if (!cur) return null;
   return (
-    <div className="jd mb-4 mt-8 rounded-card p-5">
+    <div
+      className="jd mb-4 mt-8 rounded-card p-5"
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        e.currentTarget.style.setProperty("--ry", (x - 0.5) * 8 + "deg");
+        e.currentTarget.style.setProperty("--rx", (0.5 - y) * 6 + "deg");
+        e.currentTarget.style.setProperty("--mx", x * 100 + "%");
+        e.currentTarget.style.setProperty("--my", y * 100 + "%");
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.setProperty("--rx", "0deg");
+        e.currentTarget.style.setProperty("--ry", "0deg");
+      }}
+    >
       <p className="text-[10px] font-extrabold uppercase tracking-[0.12em]">Jetzt dran</p>
       <p className="mt-1 font-display text-[20px] leading-tight">{cur.de}</p>
       <p className="text-[12px] font-semibold">{cur.ru}</p>
@@ -723,7 +738,7 @@ function Einstellungen({ onBack }: { onBack: () => void }) {
       </button>
       <PageHeader kicker="Tally" title="Настройки" sub="Тема, зверёк и звук." />
 
-      <section className="card3d mt-8 rounded-card border border-line bg-card p-4">
+      <section className="card3d mt-8 rounded-card border border-line bg-card p-4 lg:p-6">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Тема</p>
         <Tabs
           className="mt-3"
@@ -735,12 +750,12 @@ function Einstellungen({ onBack }: { onBack: () => void }) {
         />
       </section>
 
-      <section className="card3d mt-6 rounded-card border border-line bg-card p-4">
+      <section className="card3d mt-6 rounded-card border border-line bg-card p-4 lg:p-6">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Маскот</p>
         <MascotPicker noTitle className="mt-2 border-0 p-0 shadow-none" />
       </section>
 
-      <section className="card3d mt-6 rounded-card border border-line bg-card p-4">
+      <section className="card3d mt-6 rounded-card border border-line bg-card p-4 lg:p-6">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-extrabold">Звук</p>
           <button
@@ -774,7 +789,7 @@ function Today({ mv, m, onMix }: { mv: Mv; m: M; onMix?: () => void }) {
   const mascot = useMascot();
 
   return (
-    <div className="card3d rounded-card border border-line bg-card p-4">
+    <div className="card3d rounded-card border border-line bg-card p-4 lg:p-6">
       {/* зверёк и одна фраза: это единственная часть карточки, которую
           читают не глазами, а настроением */}
       <div className="flex items-end gap-2">

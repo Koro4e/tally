@@ -999,7 +999,7 @@ function Summary({
         </div>
 
         {mv && (
-          <div className="card3d mt-3 rounded-card border border-line bg-card p-4">
+          <div className="card3d mt-3 rounded-card border border-line bg-card p-4 lg:p-6">
             <div className="flex items-end gap-3">
               <Mascot char={mascot} mood={moodOfSnap(mv)} celebrate className="h-[58px] w-auto shrink-0" />
               <div className="min-w-0 flex-1">
@@ -1040,7 +1040,7 @@ function Summary({
           </div>
         )}
 
-        <div className="card3d mt-3 rounded-card border border-line bg-card p-4">
+        <div className="card3d mt-3 rounded-card border border-line bg-card p-4 lg:p-6">
           <div className="flex items-baseline justify-between text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">
             <span>Knoten</span>
             <span className="tnum text-[13px] text-ink">
@@ -1086,7 +1086,7 @@ function Summary({
         </div>
 
         {log.length > 0 && (
-          <div className="card3d mt-3 rounded-card border border-line bg-card p-4">
+          <div className="card3d mt-3 rounded-card border border-line bg-card p-4 lg:p-6">
             <div className="flex items-baseline justify-between text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">
               <span>Aufgaben</span>
               <span className="tnum">
