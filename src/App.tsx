@@ -896,7 +896,7 @@ function Weg({
               aria-label="Zum aktuellen Knoten"
               className="pointer-events-auto grid h-12 w-12 place-items-center rounded-full border-2 border-line bg-white shadow-[0_4px_0_#e5e5e5] transition-transform active:translate-y-[3px] active:shadow-none"
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#58cc02" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 19V5M5 12l7-7 7 7" />
               </svg>
             </button>
@@ -986,7 +986,7 @@ function Node({
         className={cn(
           "relative grid shrink-0 place-items-center transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue",
           combo ? "rotate-45 rounded-[18px]" : "rounded-full",
-          cur && "bg-green text-white shadow-[0_4px_0_#46a302]",
+          cur && "bg-green text-white shadow-[0_4px_0_var(--color-greend)]",
           !cur && st === "mastered" && "bg-gold text-white shadow-[0_4px_0_#e0a800]",
           !cur && st === "review" && "bg-blue text-white shadow-[0_4px_0_#1899d6]",
           !cur && st === "open" && "border-2 border-green bg-white text-green shadow-[0_4px_0_#e5e5e5]",

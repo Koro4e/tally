@@ -1498,3 +1498,13 @@ OCR требует сервера → работает на localhost (и люб
 - render.yaml/hf-deploy.py в репо — задел на будущее, сейчас не используются.
 - Пробуждение: Vercel functions не «спят» как Render — холодный старт ~1 c,
   wake-on-open не нужен.
+
+## Обновление 04.11.2026 (9) — свой домен: https://tally.koro4e.eu.cc
+
+Хозяин уже владеет зоной koro4e.eu.cc (Cloudflare, туннели для sdv/inkboard).
+Подключение к TALLY без затрагивания туннелей:
+- Vercel: `vercel domains add tally.koro4e.eu.cc tally` + alias на прод
+  (tally-pink-eight.vercel.app).
+- DNS (сделал хозяин): CNAME tally → cname.vercel-dns.com, Proxy = DNS only.
+- Проверено: https://tally.koro4e.eu.cc → 200 + SSL, /api/health → {ok, ocr:true}.
+- Локальный ПК не участвует: приложение 24/7 на Vercel. Туннель и игра не тронуты.

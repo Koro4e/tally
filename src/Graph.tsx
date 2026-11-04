@@ -190,7 +190,7 @@ export default function Graph({ plot }: { plot: Plot }) {
         <path
           d={g.d}
           fill="none"
-          stroke="#58cc02"
+          stroke="var(--color-green)"
           strokeWidth="2.6"
           strokeLinecap="round"
           strokeLinejoin="round"
