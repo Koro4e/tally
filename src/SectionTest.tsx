@@ -100,7 +100,7 @@ export default function SectionTest({
   if (tasks && tasks.length === 0) {
     return (
       <div className="mx-auto w-full max-w-[640px] px-4 py-10">
-        <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+        <div className="card3d rounded-card border border-line bg-card p-6 text-center">
           <p className="text-[13px] font-bold text-muted">
             В банке пока слишком мало задач по разделу «{branchTitle}» — контрольную
             собрать нельзя. Доберём следующим прогоном банка.
@@ -129,7 +129,7 @@ export default function SectionTest({
     const pass = correct / Math.max(1, tasks.length) >= 0.75;
     return (
       <div className="mx-auto w-full max-w-[640px] px-4 py-10">
-        <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+        <div className="card3d rounded-card border border-line bg-card p-6 text-center">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
             Kontrolle · {branchTitle}
           </p>
@@ -192,7 +192,7 @@ export default function SectionTest({
         </span>
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">
           Kontrolle · Stufe {cur.level ?? "—"}
         </p>

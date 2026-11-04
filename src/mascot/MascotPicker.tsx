@@ -24,7 +24,7 @@ export default function MascotPicker({
 }) {
   const cur = useMascot();
   return (
-    <div className={cn("card3d rounded-card border-2 border-line bg-white p-4", className)}>
+    <div className={cn("card3d rounded-card border border-line bg-card p-4", className)}>
       {!noTitle && (
         <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
           Dein Maskottchen
@@ -37,13 +37,13 @@ export default function MascotPicker({
             <button
               key={ch.id}
               type="button"
-              onClick={() => {
-                setMascot(ch.id);
+              onClick={(e) => {
+                setMascot(ch.id, { x: e.clientX, y: e.clientY });
                 toggleClick();
               }}
               aria-pressed={on}
               className={cn(
-                "btn3d flex flex-col items-center rounded-xl border-2 bg-white px-0.5 pt-2 pb-1.5",
+                "btn3d flex flex-col items-center rounded-xl border-2 bg-card px-0.5 pt-2 pb-1.5",
                 on ? "border-green" : "border-line hover:bg-bg",
               )}
               style={on ? ({ "--btn-shadow": "var(--color-greend)" } as CSSProperties) : undefined}

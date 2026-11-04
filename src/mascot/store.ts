@@ -35,7 +35,7 @@ export function getMascot(): MascotChar {
   return current;
 }
 
-export function setMascot(ch: MascotChar): void {
+export function setMascot(ch: MascotChar, at?: { x: number; y: number }): void {
   if (ch === current) return;
   current = ch;
   try {
@@ -43,7 +43,21 @@ export function setMascot(ch: MascotChar): void {
   } catch {
     /* ignore */
   }
-  for (const l of listeners) l();
+  /* та же круговая волна, что и у темы: акцент перетекает по клику */
+  const swap = () => {
+    /* дата-атрибут ставим синхронно: снимок нового состояния для
+       View Transition должен уже видеть новый акцент */
+    document.documentElement.dataset.mascot = ch;
+    for (const l of listeners) l();
+  };
+  if (at && typeof document.startViewTransition === 'function') {
+    const r = document.documentElement;
+    r.style.setProperty('--x', at.x + 'px');
+    r.style.setProperty('--y', at.y + 'px');
+    document.startViewTransition(swap);
+  } else {
+    swap();
+  }
 }
 
 function subscribe(l: () => void): () => void {

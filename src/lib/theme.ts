@@ -27,15 +27,27 @@ export function getTheme(): ThemeMode {
   return current;
 }
 
-export function setTheme(t: ThemeMode): void {
+export function setTheme(t: ThemeMode, at?: { x: number; y: number }): void {
   current = t;
   try {
     localStorage.setItem(KEY, t);
   } catch {
     /* ignore */
   }
-  apply();
-  for (const l of listeners) l();
+  /* Смена темы — круговая волна от места клика (View Transitions API из
+     макета; центр волны пишется в --x/--y). Fallback — простое применение. */
+  const swap = () => {
+    apply();
+    for (const l of listeners) l();
+  };
+  if (at && typeof document.startViewTransition === 'function') {
+    const r = document.documentElement;
+    r.style.setProperty('--x', at.x + 'px');
+    r.style.setProperty('--y', at.y + 'px');
+    document.startViewTransition(swap);
+  } else {
+    swap();
+  }
 }
 
 export function subscribe(l: () => void): () => void {

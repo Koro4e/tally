@@ -36,7 +36,7 @@ export default function Pruefung({
         title="Prüfung"
         sub="Probeprüfung целиком, Mix-раунды и контрольные по разделам пути."
       />
-      <div className="card3d mt-8 rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d mt-8 rounded-card border border-line bg-card p-4">
         <button
           type="button"
           onClick={onExam}
@@ -65,7 +65,7 @@ export default function Pruefung({
                 key={b.id}
                 type="button"
                 onClick={() => onKontrolle(b.id)}
-                className="rounded-xl border-2 border-line bg-white px-2.5 py-2 text-left transition hover:border-muted"
+                className="rounded-xl border border-line bg-card px-2.5 py-2 text-left transition hover:border-muted"
               >
                 <span className="block text-[12px] font-extrabold">{b.de}</span>
                 <span className="block text-[10px] font-semibold text-muted">{b.ru}</span>

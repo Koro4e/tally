@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 import PageHeader from "@/PageHeader";
+import Tabs from "@/ui/Tabs";
 import {
   EXAM_CORE,
   LEVELS,
@@ -197,7 +198,7 @@ function ChoiceSentence({
               {value}
             </span>
           ) : (
-            <span key={k} className="mx-1 inline-block border-b-2 border-line px-3 text-muted">
+            <span key={k} className="mx-1 inline-block border-b border-line px-3 text-muted">
               …
             </span>
           );
@@ -247,7 +248,7 @@ function ChipOrder({
               type="button"
               disabled={disabled}
               onClick={() => onBack(pos)}
-              className="rounded-lg border-2 border-line bg-white px-2.5 py-1.5 text-[14px] font-extrabold text-ink"
+              className="rounded-lg border border-line bg-card px-2.5 py-1.5 text-[14px] font-extrabold text-ink"
             >
               {chips[ci]}
             </button>
@@ -262,7 +263,7 @@ function ChipOrder({
               type="button"
               disabled={disabled}
               onClick={() => onTake(i)}
-              className="rounded-lg border-2 border-line bg-white px-2.5 py-1.5 text-[14px] font-extrabold text-ink hover:border-blue"
+              className="rounded-lg border border-line bg-card px-2.5 py-1.5 text-[14px] font-extrabold text-ink hover:border-blue"
             >
               {w}
             </button>
@@ -298,7 +299,7 @@ function Theorie({
         ← Weg
       </button>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <Kicker>
@@ -342,7 +343,7 @@ function Theorie({
                       {t.tabelle.head.map((h) => (
                         <th
                           key={h}
-                          className="border-b-2 border-line px-2 py-1.5 text-left text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted"
+                          className="border-b border-line px-2 py-1.5 text-left text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted"
                         >
                           {h}
                         </th>
@@ -599,7 +600,7 @@ function Runde({
         ))}
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <div className="flex items-baseline justify-between gap-3">
           <Kicker>{cur.task}</Kicker>
           {cur.hint && (
@@ -633,10 +634,10 @@ function Runde({
                             ? "border-green bg-greenl text-greend"
                             : picked
                               ? "border-red bg-redl text-red"
-                              : "border-line bg-white text-muted"
+                              : "border-line bg-card text-muted"
                           : picked
                             ? "border-blue bg-blue/10 text-blue"
-                            : "border-line bg-white text-ink hover:border-muted",
+                            : "border-line bg-card text-ink hover:border-muted",
                       )}
                     >
                       {o}
@@ -782,7 +783,7 @@ function Fertig({
   const mascot = useMascot();
   return (
     <div className="mx-auto w-full max-w-[680px] px-4 py-10">
-      <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+      <div className="card3d rounded-card border border-line bg-card p-6 text-center">
         <Mascot
           char={mascot}
           mood={pass ? "cheer" : "sad"}
@@ -974,41 +975,30 @@ export default function Deutsch({
         sub="A1–C1 · экзамен 09.01.2027 · задания 3.1–3.4 дают 30 из 100 баллов"
       />
 
-      <div className="mt-8 flex gap-1.5">
-        {LEVELS.map((lv) => (
-          <button
-            key={lv}
-            type="button"
-            onClick={() => setLevel(lv)}
-            className={cn(
-              "flex-1 rounded-xl border-2 py-2 text-[12px] font-extrabold transition",
-              lv === level
-                ? "border-green bg-greenl text-greend"
-                : "border-line bg-white text-muted hover:border-muted",
-            )}
-          >
-            {lv}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        className="mt-8"
+        items={LEVELS.map((lv) => ({ id: lv, label: lv }))}
+        value={level}
+        onChange={(lv) => setLevel(lv as typeof LEVELS[number])}
+      />
       <p className="tnum mt-2 text-right text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
         {level}: пройдено {levelStats.done} из {levelStats.total} · всего {counts.done}/{counts.total}
       </p>
 
       {cur && (
-        <div className="card3d mt-3 rounded-card border-2 border-green bg-white p-4">
+        <div className="jd mt-6 rounded-card p-5">
           <div className="flex items-baseline justify-between">
             <Kicker>Jetzt dran</Kicker>
-            <span className="text-[10px] font-extrabold text-muted">
+            <span className="text-[10px] font-extrabold">
               {statusDe(cur, m) === "review" ? "Wiederholung" : "neu"}
             </span>
           </div>
-          <p className="mt-1 text-[16px] font-extrabold">{cur.de}</p>
-          <p className="text-[11.5px] font-semibold text-muted">{cur.ru}</p>
+          <p className="mt-1 font-display text-[18px] leading-tight">{cur.de}</p>
+          <p className="text-[12px] font-semibold">{cur.ru}</p>
           <button
             type="button"
             onClick={() => open(cur)}
-            className="btn3d btn3d-green mt-3 w-full rounded-xl py-3 text-[12px] font-extrabold uppercase tracking-[0.1em]"
+            className="btn3d mt-3 w-full rounded-xl bg-card py-3 text-[12px] font-extrabold uppercase tracking-[0.1em] text-ink [--btn-shadow:#0000004d]"
           >
             Weiter · {cur.de}
           </button>
@@ -1028,7 +1018,7 @@ export default function Deutsch({
               type="button"
               onClick={() => open(t)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl border-2 bg-white px-3 py-2.5 text-left transition",
+                "flex w-full items-center gap-3 rounded-xl border-2 bg-card px-3 py-2.5 text-left transition",
                 "border-line hover:border-muted",
                 st === "mastered" && "border-green/40",
               )}

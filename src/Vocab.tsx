@@ -21,6 +21,7 @@
 import { useState } from "react";
 import { cn } from "@/utils/cn";
 import PageHeader from "@/PageHeader";
+import Tabs from "@/ui/Tabs";
 import { judge, norm } from "@/lib/de/gen";
 import type { Snap } from "@/lib/motivation";
 import {
@@ -317,7 +318,7 @@ export default function Vocab({
     if (done) {
       return (
         <div className="mx-auto w-full max-w-[640px] px-4 py-10">
-          <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+          <div className="card3d rounded-card border border-line bg-card p-6 text-center">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
               Wortschatz · {level}
             </p>
@@ -398,7 +399,7 @@ export default function Vocab({
           </p>
         )}
 
-        <div className="card3d rounded-card border-2 border-line bg-white p-5">
+        <div className="card3d rounded-card border border-line bg-card p-5">
           {isCard ? (
             <>
               <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-blue">
@@ -481,10 +482,10 @@ export default function Vocab({
                               ? "border-green bg-greenl text-greend"
                               : picked
                                 ? "border-red bg-redl text-red"
-                                : "border-line bg-white text-muted"
+                                : "border-line bg-card text-muted"
                             : picked
                               ? "border-blue bg-blue/10 text-blue"
-                              : "border-line bg-white text-ink hover:border-muted",
+                              : "border-line bg-card text-ink hover:border-muted",
                         )}
                       >
                         {o}
@@ -556,25 +557,17 @@ export default function Vocab({
         sub={`Словарь с повторениями · каждый заход — до ${NEW_PER_DAY} новых слов, ошибка возвращает слово в начало`}
       />
 
-      <div className="mt-8 flex gap-1.5">
-        {TABS.map((lv) => (
-          <button
-            key={lv}
-            type="button"
-            onClick={() => setLevel(lv)}
-            className={cn(
-              "flex-1 rounded-xl border-2 py-2 text-[12px] font-extrabold transition",
-              lv === level
-                ? "border-green bg-greenl text-greend"
-                : "border-line bg-white text-muted hover:border-muted",
-            )}
-          >
-            {lv === "MEINE" ? `Meine·${customCount()}` : lv}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        className="mt-8"
+        items={TABS.map((lv) => ({
+          id: lv,
+          label: lv === "MEINE" ? `Meine·${customCount()}` : lv,
+        }))}
+        value={level}
+        onChange={(lv) => setLevel(lv as typeof TABS[number])}
+      />
 
-      <div className="card3d mt-6 rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d mt-6 rounded-card border border-line bg-card p-4">
         <div className="flex items-baseline justify-between">
           <p className="text-[13px] font-extrabold">
             Закреплено {stat.known} из {stat.total}
@@ -595,7 +588,7 @@ export default function Vocab({
       </div>
 
       {level === "MEINE" && (
-        <div key={cv} className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+        <div key={cv} className="card3d mt-3 rounded-card border border-line bg-card p-4">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
             Свои слова · из Lesen «не знаю» и ручного ввода
           </p>
@@ -683,14 +676,14 @@ export default function Vocab({
                 onBlur={() => localStorage.setItem("tally.ai.key.v1", aiKey.trim())}
                 type="password"
                 placeholder="API-ключ (хранится только в этом браузере)"
-                className="w-full rounded-lg border-b-2 border-line bg-transparent px-1 py-1 text-[12px] font-semibold outline-none focus:border-blue"
+                className="w-full rounded-lg border-b border-line bg-transparent px-1 py-1 text-[12px] font-semibold outline-none focus:border-blue"
               />
               <input
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
                 onBlur={() => localStorage.setItem("tally.ai.model.v1", aiModel.trim())}
                 placeholder="модель, напр. llama-3.3-70b-versatile"
-                className="w-full rounded-lg border-b-2 border-line bg-transparent px-1 py-1 text-[12px] font-semibold outline-none focus:border-blue"
+                className="w-full rounded-lg border-b border-line bg-transparent px-1 py-1 text-[12px] font-semibold outline-none focus:border-blue"
               />
               <button
                 type="button"

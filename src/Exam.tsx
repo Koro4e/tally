@@ -282,7 +282,7 @@ export default function Exam({
           60 Minuten · 7 Aufgaben · 20 Punkte · kein Taschenrechner
         </p>
 
-        <div className="card3d mt-4 rounded-card border-2 border-line bg-white p-2">
+        <div className="card3d mt-4 rounded-card border border-line bg-card p-2">
           {BLOCKS.map((b, i) => {
             const t = built[i];
             const state = t === null ? "fail" : t ? "ok" : "wait";
@@ -393,7 +393,7 @@ export default function Exam({
           </p>
         </div>
 
-        <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-2">
+        <div className="card3d mt-3 rounded-card border border-line bg-card p-2">
           {result.parts.map((p) => (
             <div
               key={p.n}
@@ -438,7 +438,7 @@ export default function Exam({
 
         {/* что именно просело — единственное, ради чего стоит смотреть итог */}
         {result.parts.some((p) => !p.ok) && (
-          <div className="mt-3 rounded-card border-2 border-line bg-white p-3.5">
+          <div className="mt-3 rounded-card border border-line bg-card p-3.5">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-red">
               Das kostet Punkte
             </p>
@@ -495,7 +495,7 @@ export default function Exam({
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
-      <header className="sticky top-0 z-10 border-b-2 border-line bg-white">
+      <header className="sticky top-0 z-10 border-b border-line bg-card">
         <div className="mx-auto flex max-w-[560px] items-center gap-3 px-4 pt-3 pb-2">
           <span className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">
             Prüfung
@@ -526,7 +526,7 @@ export default function Exam({
       </header>
 
       <main className="mx-auto flex w-full max-w-[560px] flex-1 flex-col px-4 py-5">
-        <div className="card3d rounded-card border-2 border-line bg-white p-4">
+        <div className="card3d rounded-card border border-line bg-card p-4">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
             {items[idx]?.b.de ?? ""} · {items[idx]?.b.pts ?? 1} Punkte
           </p>
@@ -573,7 +573,7 @@ export default function Exam({
               placeholder="Antwort"
               autoComplete="off"
               spellCheck={false}
-              className="tnum min-w-0 flex-1 rounded-xl border-2 border-line bg-white px-3.5 py-3 text-[19px] font-extrabold outline-none placeholder:text-[11px] placeholder:font-extrabold placeholder:uppercase placeholder:tracking-[0.12em] placeholder:text-muted focus:border-blue"
+              className="tnum min-w-0 flex-1 rounded-xl border border-line bg-card px-3.5 py-3 text-[19px] font-extrabold outline-none placeholder:text-[11px] placeholder:font-extrabold placeholder:uppercase placeholder:tracking-[0.12em] placeholder:text-muted focus:border-blue"
             />
           </div>
           <p className="mt-2 text-[10px] font-bold text-muted">

@@ -140,7 +140,7 @@ export default function MixTest({
   if (tasks && tasks.length < 4) {
     return (
       <div className="mx-auto w-full max-w-[680px] px-4 py-10">
-        <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+        <div className="card3d rounded-card border border-line bg-card p-6 text-center">
           <p className="text-[13px] font-bold text-muted">
             В банке пока мало задач под твою смесь узлов — Mix собирать не из чего.
             Банк добирается фоном, загляни позже.
@@ -168,7 +168,7 @@ export default function MixTest({
   if (done) {
     return (
       <div className="mx-auto w-full max-w-[680px] px-4 py-10">
-        <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+        <div className="card3d rounded-card border border-line bg-card p-6 text-center">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
             Mix-Runde · всё вперемешку
           </p>
@@ -235,7 +235,7 @@ export default function MixTest({
         </span>
       </div>
 
-      <div className="card3d rounded-card border-2 border-blue/40 bg-white p-5">
+      <div className="card3d rounded-card border-2 border-blue/40 bg-card p-5">
         <div className="flex items-baseline gap-2">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-blue">Mix</p>
           <span className="ml-auto rounded bg-bg px-1.5 py-0.5 text-[10px] font-extrabold text-muted">

@@ -593,7 +593,7 @@ export default function Tutor({
   /* ------------------------------------------------------------- раунд ---- */
   return (
     <div className="flex min-h-screen flex-col bg-bg">
-      <header className="sticky top-0 z-10 border-b-2 border-line bg-white">
+      <header className="sticky top-0 z-10 border-b border-line bg-card">
         <div className="mx-auto flex max-w-[560px] items-center gap-3 px-4 pt-3 pb-2">
           <button
             type="button"
@@ -604,7 +604,7 @@ export default function Tutor({
           </button>
           <span className="min-w-0 truncate text-[13px] font-extrabold">{skill.de}</span>
           {/* переключатель режима сложности — под рукой, но не мешает */}
-          <div className="ml-auto flex shrink-0 items-center rounded-lg border-2 border-line bg-white p-0.5 text-[10px] font-extrabold">
+          <div className="ml-auto flex shrink-0 items-center rounded-lg border border-line bg-card p-0.5 text-[10px] font-extrabold">
             <button
               type="button"
               onClick={() => setDiffSave("lite")}
@@ -684,7 +684,7 @@ export default function Tutor({
 
         {task && (
           <>
-            <div className="card3d rounded-card border-2 border-line bg-white p-5">
+            <div className="card3d rounded-card border border-line bg-card p-5">
               <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
                 <span
                   className={cn("h-2 w-2 rounded-full", task.verified ? "bg-green" : "bg-gold")}
@@ -742,7 +742,7 @@ export default function Tutor({
                 placeholder="Antwort"
                 autoComplete="off"
                 spellCheck={false}
-                className="tnum min-w-0 flex-1 rounded-xl border-2 border-line bg-white px-4 py-3.5 text-[21px] font-extrabold outline-none placeholder:text-[11px] placeholder:font-extrabold placeholder:uppercase placeholder:tracking-[0.12em] placeholder:text-muted focus:border-blue disabled:bg-bg"
+                className="tnum min-w-0 flex-1 rounded-xl border border-line bg-card px-4 py-3.5 text-[21px] font-extrabold outline-none placeholder:text-[11px] placeholder:font-extrabold placeholder:uppercase placeholder:tracking-[0.12em] placeholder:text-muted focus:border-blue disabled:bg-bg"
               />
               <button
                 type="button"
@@ -882,7 +882,7 @@ export default function Tutor({
                         key={i}
                         className={cn(
                           "rounded-xl px-3 py-2 text-[13px] leading-[1.6] font-semibold whitespace-pre-wrap",
-                          m.role === "user" ? "bg-black/[0.04] text-muted" : "bg-white text-ink",
+                          m.role === "user" ? "bg-black/[0.04] text-muted" : "bg-card text-ink",
                         )}
                       >
                         {m.role === "user" ? `› ${m.content}` : <MathText>{m.content}</MathText>}
@@ -901,7 +901,7 @@ export default function Tutor({
                       void sendChat();
                     }}
                     placeholder="Warum dieser Schritt?"
-                    className="min-w-0 flex-1 rounded-xl border-2 border-line bg-white px-3 py-2 text-[13px] font-semibold outline-none placeholder:text-muted focus:border-blue"
+                    className="min-w-0 flex-1 rounded-xl border border-line bg-card px-3 py-2 text-[13px] font-semibold outline-none placeholder:text-muted focus:border-blue"
                   />
                   <button
                     type="button"
@@ -967,7 +967,7 @@ function Summary({
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
-      <header className="border-b-2 border-line bg-white px-4 py-3">
+      <header className="border-b border-line bg-card px-4 py-3">
         <div className="mx-auto flex max-w-[560px] items-center gap-3">
           <span className="text-[13px] font-extrabold">{skill.de}</span>
           <span className="ml-auto text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
@@ -999,7 +999,7 @@ function Summary({
         </div>
 
         {mv && (
-          <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+          <div className="card3d mt-3 rounded-card border border-line bg-card p-4">
             <div className="flex items-end gap-3">
               <Mascot char={mascot} mood={moodOfSnap(mv)} celebrate className="h-[58px] w-auto shrink-0" />
               <div className="min-w-0 flex-1">
@@ -1040,7 +1040,7 @@ function Summary({
           </div>
         )}
 
-        <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+        <div className="card3d mt-3 rounded-card border border-line bg-card p-4">
           <div className="flex items-baseline justify-between text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">
             <span>Knoten</span>
             <span className="tnum text-[13px] text-ink">
@@ -1086,7 +1086,7 @@ function Summary({
         </div>
 
         {log.length > 0 && (
-          <div className="card3d mt-3 rounded-card border-2 border-line bg-white p-4">
+          <div className="card3d mt-3 rounded-card border border-line bg-card p-4">
             <div className="flex items-baseline justify-between text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">
               <span>Aufgaben</span>
               <span className="tnum">

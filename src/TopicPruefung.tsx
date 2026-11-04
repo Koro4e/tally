@@ -88,7 +88,7 @@ export default function TopicPruefung({
   if (tasks && tasks.length < 3) {
     return (
       <div className="mx-auto w-full max-w-[640px] px-4 py-10">
-        <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+        <div className="card3d rounded-card border border-line bg-card p-6 text-center">
           <p className="text-[13px] font-bold text-muted">
             В банке пока мало задач по теме «{skill.de}» — финальную проверку
             собрать не из чего. Банк добирается фоном, попробуй позже.
@@ -116,7 +116,7 @@ export default function TopicPruefung({
   if (done) {
     return (
       <div className="mx-auto w-full max-w-[640px] px-4 py-10">
-        <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+        <div className="card3d rounded-card border border-line bg-card p-6 text-center">
           <Mascot
             char={mascot}
             mood={passed ? "cheer" : "sad"}
@@ -183,7 +183,7 @@ export default function TopicPruefung({
         </span>
       </div>
 
-      <div className="card3d rounded-card border-2 border-ink/20 bg-white p-5">
+      <div className="card3d rounded-card border-2 border-ink/20 bg-card p-5">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
           Themen-Prüfung · {skill.de} · зачёт 5 из 6
         </p>

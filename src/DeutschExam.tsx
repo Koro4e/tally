@@ -62,7 +62,7 @@ function WordPopup({ raw, onClose }: { raw: string; onClose: () => void }) {
   const guess = hit ? null : guessArticle(bare);
   const [added, setAdded] = useState(false);
   return (
-    <div className="fixed inset-x-3 bottom-3 z-30 rounded-card border-2 border-blue bg-white p-4 shadow-lg">
+    <div className="fixed inset-x-3 bottom-3 z-30 rounded-card border-2 border-blue bg-card p-4 shadow-lg">
       <div className="flex items-baseline gap-2">
         <p className="text-[18px] font-extrabold">{de || bare}</p>
         {note && <span className="text-[10.5px] font-bold text-muted">{note}</span>}
@@ -137,7 +137,7 @@ function LesenRun({
 
   if (done) {
     return (
-      <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+      <div className="card3d rounded-card border border-line bg-card p-6 text-center">
         <p className="tnum text-[44px] leading-none font-extrabold">
           {correct}
           <span className="text-[22px] text-muted"> / {text.items.length}</span>
@@ -168,7 +168,7 @@ function LesenRun({
         </span>
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4">
         <Kicker>{text.title} · {text.rubrik}</Kicker>
         <button
           type="button"
@@ -201,7 +201,7 @@ function LesenRun({
         )}
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <p className="text-[16px] leading-[1.6] font-bold">{cur.stmt}</p>
         {picked === null ? (
           <div className="mt-4 flex gap-2">
@@ -284,7 +284,7 @@ function LueckRun({
         <span className="ml-auto text-[11px] font-extrabold text-muted">{text.title}</span>
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <Kicker>Lückentext · Wähle a, b oder c</Kicker>
         <p className="mt-3 text-[15px] leading-[2.1] font-bold">
           {parts.map((p, k) => {
@@ -302,7 +302,7 @@ function LueckRun({
                     setPicked((prev) => prev.map((x, j) => (j === i ? (Number(e.target.value) as 0 | 1 | 2) : x)))
                   }
                   className={cn(
-                    "rounded-lg border-2 bg-white px-1 py-0.5 text-[13px] font-extrabold outline-none",
+                    "rounded-lg border-2 bg-card px-1 py-0.5 text-[13px] font-extrabold outline-none",
                     checked
                       ? good
                         ? "border-green text-greend"
@@ -399,12 +399,12 @@ function SchreibenRun({
         <span className="ml-auto text-[11px] font-extrabold text-muted">{aufgabe.title}</span>
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4">
         <Kicker>Bildergeschichte · 6 Bilder</Kicker>
         <p className="mt-2 text-[12px] leading-[1.55] font-semibold text-muted">{aufgabe.intro}</p>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {aufgabe.scenes.map((sc, i) => (
-            <div key={i} className="rounded-xl border-2 border-line bg-bg/60 p-2.5">
+            <div key={i} className="rounded-xl border border-line bg-bg/60 p-2.5">
               <p className="tnum text-[10px] font-extrabold text-muted">Bild {i + 1}</p>
               <p className="mt-1 text-[12px] leading-[1.45] font-bold">{sc.caption}</p>
               <p className="mt-1 text-[10.5px] leading-[1.4] font-semibold text-muted">{sc.ru}</p>
@@ -413,7 +413,7 @@ function SchreibenRun({
         </div>
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4">
         <Kicker>Deine Geschichte · {words} Wörter</Kicker>
         <textarea
           value={text}
@@ -421,11 +421,11 @@ function SchreibenRun({
           rows={9}
           spellCheck={false}
           placeholder="Im Frühjahr habe ich …"
-          className="mt-2 w-full rounded-xl border-2 border-line bg-white p-3 text-[14px] font-semibold leading-[1.6] outline-none placeholder:text-[12px] placeholder:text-muted focus:border-blue"
+          className="mt-2 w-full rounded-xl border border-line bg-card p-3 text-[14px] font-semibold leading-[1.6] outline-none placeholder:text-[12px] placeholder:text-muted focus:border-blue"
         />
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4">
         <Kicker>Selbstkontrolle — честно: экзаменатор проверяет именно это</Kicker>
         <div className="mt-2 space-y-1.5">
           {aufgabe.checklist.map((c, i) => (
@@ -441,7 +441,7 @@ function SchreibenRun({
               <span
                 className={cn(
                   "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-extrabold",
-                  checked[i] ? "bg-green text-white" : "border-2 border-line bg-white text-transparent",
+                  checked[i] ? "bg-green text-white" : "border border-line bg-card text-transparent",
                 )}
               >
                 ✓
@@ -509,7 +509,7 @@ function GrammRun({
 
   if (done) {
     return (
-      <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+      <div className="card3d rounded-card border border-line bg-card p-6 text-center">
         <p className="tnum text-[44px] leading-none font-extrabold">
           {correct}
           <span className="text-[22px] text-muted"> / {items.length}</span>
@@ -533,7 +533,7 @@ function GrammRun({
           {idx + 1} / {items.length} · {correct} richtig
         </span>
       </div>
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">{cur.task}</p>
         {cur.hint && <p className="mt-1 text-[12px] font-extrabold text-blue">{cur.hint}</p>}
         <p className={cn("mt-3 font-bold", wide ? "text-[15px] leading-[1.9]" : "text-[16px] leading-[2.2]")}>
@@ -767,7 +767,7 @@ export default function DeutschExam({
               if (p.id === "grammatik") setGrammSeed((x) => x + 1);
               setPart(p);
             }}
-            className="flex w-full items-center gap-3 rounded-xl border-2 border-line bg-white px-3 py-2.5 text-left transition hover:border-muted"
+            className="flex w-full items-center gap-3 rounded-xl border border-line bg-card px-3 py-2.5 text-left transition hover:border-muted"
           >
             <span className="shrink-0 rounded bg-gold/25 px-1.5 py-0.5 text-[10px] font-extrabold text-ink">
               {p.num}
@@ -793,7 +793,7 @@ export default function DeutschExam({
                   setLesenIdx(i);
                   setPart(PARTS[0]);
                 }}
-                className="flex-1 rounded-xl border-2 border-line bg-white px-2 py-2.5 text-left hover:border-muted"
+                className="flex-1 rounded-xl border border-line bg-card px-2 py-2.5 text-left hover:border-muted"
               >
                 <span className="block truncate text-[12px] font-extrabold">{t.title}</span>
                 <span className="block text-[10px] font-semibold text-muted">{t.rubrik}</span>
@@ -809,7 +809,7 @@ export default function DeutschExam({
                   setSchreibenIdx(i);
                   setPart(PARTS[2]);
                 }}
-                className="flex-1 rounded-xl border-2 border-line bg-white px-2 py-2.5 text-left hover:border-muted"
+                className="flex-1 rounded-xl border border-line bg-card px-2 py-2.5 text-left hover:border-muted"
               >
                 <span className="block truncate text-[12px] font-extrabold">{t.title}</span>
                 <span className="block text-[10px] font-semibold text-muted">5 · Schreiben</span>
@@ -825,7 +825,7 @@ export default function DeutschExam({
                   setLueckIdx(i);
                   setPart(PARTS[1]);
                 }}
-                className="flex-1 rounded-xl border-2 border-line bg-white px-2 py-2.5 text-left hover:border-muted"
+                className="flex-1 rounded-xl border border-line bg-card px-2 py-2.5 text-left hover:border-muted"
               >
                 <span className="block truncate text-[12px] font-extrabold">{t.title}</span>
                 <span className="block text-[10px] font-semibold text-muted">4.1 · Lückentext</span>
@@ -935,7 +935,7 @@ function StufeRun({
                   setLevel(lv);
                   setSeed((x) => x + 1);
                 }}
-                className="flex w-full items-center gap-3 rounded-xl border-2 border-line bg-white px-3 py-2.5 text-left transition hover:border-muted disabled:opacity-40"
+                className="flex w-full items-center gap-3 rounded-xl border border-line bg-card px-3 py-2.5 text-left transition hover:border-muted disabled:opacity-40"
               >
                 <span className="shrink-0 rounded bg-gold/25 px-1.5 py-0.5 text-[10px] font-extrabold text-ink">
                   {lv}
@@ -1038,7 +1038,7 @@ function StufeAttempt({
 
   if (!cur) {
     return (
-      <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+      <div className="card3d rounded-card border border-line bg-card p-6 text-center">
         <p className="text-[13px] font-bold text-muted">Задания не собрались.</p>
         <button type="button" onClick={onBack} className="mt-3 text-[12px] font-extrabold text-blue">
           ← назад
@@ -1050,7 +1050,7 @@ function StufeAttempt({
   if (done) {
     const pass = correct / Math.max(1, items.length) >= 0.8;
     return (
-      <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+      <div className="card3d rounded-card border border-line bg-card p-6 text-center">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
           Grammatik-Prüfung · {level}
         </p>
@@ -1110,7 +1110,7 @@ function StufeAttempt({
         </span>
       </div>
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-muted">
           {cur.task}
         </p>

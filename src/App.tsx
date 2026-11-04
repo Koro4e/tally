@@ -32,6 +32,7 @@ import Vocab from "@/Vocab";
 import TopicPruefung from "@/TopicPruefung";
 import DeutschExam from "@/DeutschExam";
 import PageHeader from "@/PageHeader";
+import Tabs from "@/ui/Tabs";
 
 /* подставляется сборкой (см. define в vite.config.ts) */
 declare const __BUILD__: string;
@@ -327,30 +328,44 @@ const SUBJECTS: { id: Subject; de: string; ru: string; icon: React.ReactNode }[]
     id: "mathe",
     de: "Mathe",
     ru: "математика",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden>
-        <circle cx="3" cy="13" r="1.6" fill="currentColor" />
-        <circle cx="13" cy="3" r="1.6" fill="currentColor" />
-        <path d="M4 12c3.5-1.5 4.5-6.5 8-8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    ),
+    /* буква-глиф вместо иконки — фирменный приём макета (Unbounded) */
+    icon: <span className="font-display text-[16px] leading-none">∑</span>,
   },
   {
     id: "deutsch",
     de: "Deutsch",
     ru: "немецкий",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden>
-        <path
-          d="M2.5 3.5h11v7.5H7L4 13.5v-2.5H2.5z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    icon: <span className="font-display text-[16px] leading-none">Ä</span>,
   },
 ];
+
+/* иконки разделов в сайдбаре: stroke 1.75, round — единый стиль из макета */
+const NAV_PATHS: Record<string, string> = {
+  weg: "M6 20a2 2 0 100-4 2 2 0 000 4zM18 8a2 2 0 100-4 2 2 0 000 4zM8 18h6a3 3 0 000-6h-4a3 3 0 010-6h6",
+  programm: "M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01",
+  pruefung: "M9 11l3 3 8-8M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9",
+  grammatik: "M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5",
+  woerter: "M4 18l4-11 4 11M5.5 14h5M15 7v11M15 12h2.5a2.5 2.5 0 010 5H15",
+};
+
+function NavIcon({ name }: { name: keyof typeof NAV_PATHS }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className="shrink-0"
+    >
+      <path d={NAV_PATHS[name]} />
+    </svg>
+  );
+}
 
 /** под-навигация внутри предмета: одинаковый паттерн в обоих разделах */
 function SubBar({
@@ -363,23 +378,12 @@ function SubBar({
   onPick: (id: string) => void;
 }) {
   return (
-    <div className="mb-3 flex gap-1.5">
-      {items.map((s) => (
-        <button
-          key={s.id}
-          type="button"
-          onClick={() => onPick(s.id)}
-          aria-current={active === s.id}
-          className={cn(
-            "flex-1 rounded-xl border-2 py-2 text-[12px] font-extrabold transition",
-            active === s.id
-              ? "border-green bg-greenl text-greend"
-              : "border-line bg-white text-muted hover:border-muted",
-          )}
-        >
-          {s.de}
-        </button>
-      ))}
+    <div className="mb-4">
+      <Tabs
+        items={items.map((s) => ({ id: s.id, label: s.de }))}
+        value={active}
+        onChange={(id) => onPick(id)}
+      />
     </div>
   );
 }
@@ -422,16 +426,15 @@ function ShellSidebar({
       "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13.5px] font-extrabold transition-colors",
       on ? "bg-greenl text-greend" : "text-ink/70 hover:bg-black/[0.04] hover:text-ink",
     );
-  const dot = (on: boolean) =>
-    cn("h-2 w-2 shrink-0 rounded-full", on ? "bg-green" : "bg-line");
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r-2 border-line bg-white px-4 pt-5 pb-4 lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r-2 border-line bg-card px-4 pt-5 pb-4 lg:flex">
       <div className="flex items-baseline gap-2 px-1">
-        <span className="text-[20px] font-extrabold tracking-[-0.02em] text-green">TALLY</span>
+        <span className="font-display text-[18px] tracking-[0.04em] text-green">TALLY</span>
         <span className="text-[9px] font-bold text-muted/60">{__BUILD__}</span>
       </div>
 
-      <nav className="mt-6 space-y-1" aria-label="Предметы">
+      <nav className="mt-6 grid grid-cols-2 gap-2" aria-label="Предметы">
         {SUBJECTS.map((s) => (
           <button
             key={s.id}
@@ -439,10 +442,10 @@ function ShellSidebar({
             onClick={() => onSubject(s.id)}
             aria-current={subject === s.id}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl border-2 px-3 py-3 text-left text-[14px] font-extrabold transition-colors",
+              "flex w-full flex-col items-center gap-1 rounded-xl border-2 px-2 py-2.5 text-center text-[12px] font-extrabold transition-colors",
               subject === s.id
                 ? "border-green bg-greenl text-greend"
-                : "border-transparent text-ink/70 hover:border-line hover:bg-black/[0.03]",
+                : "border-line text-muted hover:border-muted",
             )}
           >
             {s.icon}
@@ -458,45 +461,47 @@ function ShellSidebar({
         {subject === "mathe" ? (
           <>
             <button type="button" onClick={() => { onMatheView("weg"); onView("weg"); }} className={navCls(matheView === "weg" && view === "weg")}>
-              <span className={dot(matheView === "weg" && view === "weg")} /> Weg
+              <NavIcon name="weg" /> Weg
             </button>
             <button type="button" onClick={() => { onMatheView("weg"); onView("programm"); }} className={navCls(matheView === "weg" && view === "programm")}>
-              <span className={dot(matheView === "weg" && view === "programm")} /> Programm
+              <NavIcon name="programm" /> Programm
             </button>
             <button type="button" onClick={() => onMatheView("pruefung")} className={navCls(matheView === "pruefung")}>
-              <span className={dot(matheView === "pruefung")} /> Prüfung
+              <NavIcon name="pruefung" /> Prüfung
             </button>
           </>
         ) : (
           <>
             <button type="button" onClick={() => onDeView("grammatik")} className={navCls(deView === "grammatik")}>
-              <span className={dot(deView === "grammatik")} /> Grammatik
+              <NavIcon name="grammatik" /> Grammatik
             </button>
             <button type="button" onClick={() => onDeView("woerter")} className={navCls(deView === "woerter")}>
-              <span className={dot(deView === "woerter")} /> Wörter
+              <NavIcon name="woerter" /> Wörter
             </button>
             <button type="button" onClick={() => onDeView("pruefung")} className={navCls(deView === "pruefung")}>
-              <span className={dot(deView === "pruefung")} /> Prüfung
+              <NavIcon name="pruefung" /> Prüfung
             </button>
           </>
         )}
       </nav>
 
-      <div className="mt-auto rounded-2xl border-2 border-line bg-bg p-3">
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
-          {daysLeft()} Tage bis Prüfung
-        </p>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
-          <div className="h-full bg-green transition-[width] duration-500" style={{ width: `${Math.round(progress(m) * 100)}%` }} />
+      <div className="mt-auto rounded-card border border-line bg-sf2 p-4">
+        <b className="font-display text-[18px]">{daysLeft()} Tage</b>
+        <p className="text-[12px] font-semibold text-muted">bis Prüfung · 09.01.2027</p>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
+          <div
+            className="h-full bg-green [transition:width_.9s_var(--ease)]"
+            style={{ width: `${Math.round(progress(m) * 100)}%` }}
+          />
         </div>
         <p className="tnum mt-1.5 text-[11px] font-bold text-muted">
           {c.done} / {c.total} Knoten
         </p>
-        <div className="mt-3 border-t-2 border-line pt-3">
+        <div className="mt-3">
           <button
             type="button"
             onClick={() => document.dispatchEvent(new CustomEvent("tally:settings"))}
-            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-extrabold text-ink/70 transition-colors hover:bg-black/[0.04] hover:text-ink"
+            className="btn3d btn3d-white flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-extrabold"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <circle cx="12" cy="12" r="3.2" />
@@ -528,7 +533,7 @@ function ShellHeader({
   return (
     <header className="sticky top-0 z-20 bg-bg lg:hidden">
       <div className="mx-auto flex max-w-[880px] items-center gap-3 px-4 pt-4 pb-1 lg:px-6">
-        <span className="text-[19px] font-extrabold tracking-[-0.02em] text-green">TALLY</span>
+        <span className="font-display text-[17px] tracking-[0.04em] text-green">TALLY</span>
         <span className="text-[9px] font-bold text-muted/60">{__BUILD__}</span>
         <button
           type="button"
@@ -611,7 +616,7 @@ function ShellHeader({
             <button
               type="button"
               onClick={() => onView(view === "weg" ? "programm" : "weg")}
-              className="rounded border-2 border-line px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted"
+              className="rounded border border-line px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted"
             >
               {view === "weg" ? "Programm" : "← Weg"}
             </button>
@@ -635,7 +640,7 @@ function ShellHeader({
 function TabBar({ subject, onSubject }: { subject: Subject; onSubject: (s: Subject) => void }) {
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-line bg-white lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-line bg-card lg:hidden"
       aria-label="Предметы"
     >
       <div className="mx-auto flex max-w-[520px] items-stretch">
@@ -667,29 +672,28 @@ function TabBar({ subject, onSubject }: { subject: Subject; onSubject: (s: Subje
 
 /* ----------------------------------------------------------------- путь --- */
 
-/* змейка-смещение убрано: с линией тропы оно читалось как «кружки стоят мимо
-   пути», а не как тропа. Теперь путь держит линия, а не сдвиг. */
-const POS = new Map(PATH.map((s, i) => [s.id, i]));
+/* Геометрия тропы из макета: строка 104px, зигзаг по x [0, +50, 0, −50],
+   кубические кривые между центрами узлов. */
+const TRAIL_H = 104;
+const TRAIL_X = [0, 50, 0, -50];
 
 function NextUp({ m, onPick }: { m: M; onPick: (s: Skill) => void }) {
   const cur = useMemo(() => current(m), [m]);
   if (!cur) return null;
   return (
-    <div className="card3d mb-4 mt-8 rounded-card border-2 border-green bg-white p-4">
-      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-green">
-        Jetzt dran
-      </p>
-      <p className="mt-1 text-[15px] leading-tight font-extrabold">{cur.de}</p>
-      <p className="text-[11.5px] font-semibold text-muted">{cur.ru}</p>
+    <div className="jd mb-4 mt-8 rounded-card p-5">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em]">Jetzt dran</p>
+      <p className="mt-1 font-display text-[20px] leading-tight">{cur.de}</p>
+      <p className="text-[12px] font-semibold">{cur.ru}</p>
       {covText(cur, m[cur.id]) && (
-        <p className="tnum mt-2 text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
+        <p className="tnum mt-2 text-[10px] font-extrabold uppercase tracking-[0.08em]">
           {covText(cur, m[cur.id])} Proben
         </p>
       )}
       <button
         type="button"
         onClick={() => onPick(cur)}
-        className="btn3d btn3d-green mt-3 w-full rounded-xl px-3 py-3 text-[11.5px] font-extrabold tracking-[0.04em] uppercase"
+        className="btn3d mt-3 w-full rounded-xl bg-card px-3 py-3 text-[11.5px] font-extrabold tracking-[0.04em] text-ink uppercase [--btn-shadow:#0000004d]"
       >
         <span className="block truncate">Weiter: {cur.de}</span>
       </button>
@@ -719,34 +723,24 @@ function Einstellungen({ onBack }: { onBack: () => void }) {
       </button>
       <PageHeader kicker="Tally" title="Настройки" sub="Тема, зверёк и звук." />
 
-      <section className="card3d mt-8 rounded-card border-2 border-line bg-white p-4">
+      <section className="card3d mt-8 rounded-card border border-line bg-card p-4">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Тема</p>
-        <div className="mt-2 flex gap-2">
-          {modes.map((x) => (
-            <button
-              key={x.id}
-              type="button"
-              onClick={() => setTheme(x.id)}
-              aria-pressed={mode === x.id}
-              className={cn(
-                "btn3d flex-1 rounded-xl border-2 px-2 py-2.5 text-[12px] font-extrabold",
-                mode === x.id
-                  ? "border-green bg-greenl text-greend [--btn-shadow:var(--color-greend)]"
-                  : "border-line bg-white text-muted [--btn-shadow:var(--color-line)]",
-              )}
-            >
-              {x.de}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          className="mt-3"
+          items={modes.map((x) => ({ id: x.id, label: x.de }))}
+          value={mode}
+          onChange={(id, e) =>
+            setTheme(id as ThemeMode, { x: e.clientX, y: e.clientY })
+          }
+        />
       </section>
 
-      <section className="card3d mt-6 rounded-card border-2 border-line bg-white p-4">
+      <section className="card3d mt-6 rounded-card border border-line bg-card p-4">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">Маскот</p>
         <MascotPicker noTitle className="mt-2 border-0 p-0 shadow-none" />
       </section>
 
-      <section className="card3d mt-6 rounded-card border-2 border-line bg-white p-4">
+      <section className="card3d mt-6 rounded-card border border-line bg-card p-4">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-extrabold">Звук</p>
           <button
@@ -780,7 +774,7 @@ function Today({ mv, m, onMix }: { mv: Mv; m: M; onMix?: () => void }) {
   const mascot = useMascot();
 
   return (
-    <div className="card3d rounded-card border-2 border-line bg-white p-4">
+    <div className="card3d rounded-card border border-line bg-card p-4">
       {/* зверёк и одна фраза: это единственная часть карточки, которую
           читают не глазами, а настроением */}
       <div className="flex items-end gap-2">
@@ -790,7 +784,9 @@ function Today({ mv, m, onMix }: { mv: Mv; m: M; onMix?: () => void }) {
             когда-нибудь появится, вернуть будет одна строка. */}
         <Mascot char={mascot} mood={mood} className="h-[96px] w-auto shrink-0" />
         <div className="min-w-0 flex-1 pb-1.5">
-          <p className="text-[12.5px] leading-snug font-extrabold">{petLine(mood, s)}</p>
+          <p className="inline-block rounded-[16px_16px_16px_4px] bg-sf2 px-3 py-2 text-[12.5px] leading-snug font-extrabold">
+            {petLine(mood, s)}
+          </p>
           <p className="mt-1 text-[9.5px] font-extrabold tracking-[0.1em] text-muted uppercase">
             {s.streak > 0
               ? s.streak + (s.streak === 1 ? " Tag" : " Tage") + " in Folge"
@@ -866,6 +862,18 @@ function Weg({
   const cur = useMemo(() => current(m), [m]);
   const curRef = useRef<HTMLDivElement>(null);
   const [jump, setJump] = useState(false);
+  /* тропа-зигзаг считается в пикселях: ширина колонны меряется живьём
+     (мобильный 430 → десктоп 600), маскот стоит у текущего узла */
+  const mascot = useMascot();
+  const mainRef = useRef<HTMLElement>(null);
+  const [tw, setTw] = useState(360);
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setTw(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // при входе путь подкручивается к тому узлу, где ты стоишь
   useEffect(() => {
@@ -885,7 +893,7 @@ function Weg({
   }, []);
 
   return (
-    <main className="mx-auto flex max-w-[430px] flex-col lg:max-w-[600px]">
+    <main ref={mainRef} className="mx-auto flex max-w-[430px] flex-col lg:max-w-[600px]">
       {/* на телефоне сверху — только серия и цель дня (канон: один экран —
           одна цель); смена маскота — украшение, уезжает под дерево */}
       <div className="mb-4 lg:hidden">
@@ -895,37 +903,27 @@ function Weg({
         const done = sec.nodes.filter((s) => statusOf(s, m) === "mastered").length;
         return (
           <section key={sec.key} className="mb-4">
-            <div
-              className={cn(
-                "card3d mb-5 rounded-card border-2 bg-white px-4 py-2.5",
-                sec.gold ? "border-gold/50" : "border-line",
-              )}
-            >
-              <div className="flex items-baseline gap-2">
-                <h2 className="text-[13.5px] font-extrabold">{sec.title}</h2>
-                <span className="tnum ml-auto shrink-0 text-[11px] font-bold text-muted">
-                  {done}/{sec.nodes.length}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onKontrolle(sec.key as Branch)}
-                  title="Промежуточная контрольная по разделу"
-                  className="shrink-0 rounded-lg border-2 border-line px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted transition hover:border-gold hover:text-ink"
-                >
-                  Kontrolle
-                </button>
-              </div>
-              {sec.note && (
-                <p className="mt-0.5 text-[11px] leading-snug font-semibold text-muted">{sec.note}</p>
-              )}
+            <div className="mb-1 flex items-center gap-2 px-1">
+              <h2 className="text-[15px] font-extrabold">{sec.title}</h2>
+              <span className="tnum rounded-full bg-sf2 px-3 py-1 text-[12px] font-bold text-muted">
+                {done}/{sec.nodes.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => onKontrolle(sec.key as Branch)}
+                title="Промежуточная контрольная по разделу"
+                className="rounded-full bg-gold/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-goldd transition-transform [transition-duration:var(--d1)] hover:-translate-y-0.5"
+              >
+                Kontrolle
+              </button>
             </div>
+            {sec.note && (
+              <p className="mb-2 px-1 text-[11px] leading-snug font-semibold text-muted">{sec.note}</p>
+            )}
 
-            {/* mt, а не pt: отступ снаружи — тогда absolute-тропа начинается
-                ровно от первого кружка, а не торчит обрубком над «START» */}
-            <div className="relative mt-6 flex flex-col items-center gap-3">
-              {/* тропа: без неё узлы читаются как отдельные кружки, а не как путь */}
-              <Trail nodes={sec.nodes} curId={cur?.id} />
-              {sec.nodes.map((s) => {
+            <div className="relative mt-5" style={{ height: sec.nodes.length * TRAIL_H }}>
+              <Trail nodes={sec.nodes} curId={cur?.id} width={tw} />
+              {sec.nodes.map((s, i) => {
                 const st = statusOf(s, m);
                 const isCur = cur?.id === s.id;
                 /* финальная проверка между темами: пройдена, но pf нет —
@@ -935,7 +933,8 @@ function Weg({
                   <div
                     key={s.id}
                     ref={isCur ? curRef : undefined}
-                    className="relative z-10 scroll-mt-28"
+                    className="absolute z-10 w-[120px] -translate-x-1/2 scroll-mt-28"
+                    style={{ left: `calc(50% + ${TRAIL_X[i % 4]}px)`, top: i * TRAIL_H }}
                   >
                     <Node
                       s={s}
@@ -948,6 +947,24 @@ function Weg({
                   </div>
                 );
               })}
+              {/* маскот живёт на тропе, у текущего узла (десктоп; на телефоне
+                 он уже стоит в карточке «Сегодня») */}
+              {(() => {
+                const ci = sec.nodes.findIndex((n) => n.id === cur?.id);
+                if (ci < 0) return null;
+                return (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute z-20 hidden transition-[left,top] duration-700 [transition-timing-function:var(--ease)] lg:block"
+                    style={{
+                      left: `calc(50% + ${TRAIL_X[ci % 4] + 38}px)`,
+                      top: ci * TRAIL_H + 2,
+                    }}
+                  >
+                    <Mascot char={mascot} className="h-[56px] w-auto" />
+                  </div>
+                );
+              })()}
             </div>
           </section>
         );
@@ -974,7 +991,7 @@ function Weg({
               type="button"
               onClick={() => curRef.current?.scrollIntoView({ block: "center", behavior: "smooth" })}
               aria-label="Zum aktuellen Knoten"
-              className="pointer-events-auto grid h-12 w-12 place-items-center rounded-full border-2 border-line bg-white shadow-[0_4px_0_var(--color-line)] transition-transform active:translate-y-[3px] active:shadow-none"
+              className="pointer-events-auto grid h-12 w-12 place-items-center rounded-full border border-line bg-card shadow-[0_4px_0_var(--color-line)] transition-transform active:translate-y-[3px] active:shadow-none"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 19V5M5 12l7-7 7 7" />
@@ -993,28 +1010,42 @@ function Weg({
  * поэтому линия сама «прячется» под ними и читается как станции на пути.
  * Подписи под кружками перекрывают линию фоном — иначе текст лежал бы на ней.
  */
-function Trail({ nodes, curId }: { nodes: Skill[]; curId?: string }) {
-  /* Где стоим — в координатах всего пути, а не раздела: иначе пройденные
-     разделы оставались бы серыми, хотя они уже за спиной. */
-  const curPos = curId ? POS.get(curId) ?? -1 : -1;
-  const firstPos = POS.get(nodes[0].id) ?? 0;
-  const lastPos = POS.get(nodes[nodes.length - 1].id) ?? 0;
-  const frac =
-    curPos < 0 || curPos < firstPos
-      ? 0
-      : curPos >= lastPos
-        ? 1
-        : (curPos - firstPos + 0.5) / nodes.length;
-
+function Trail({ nodes, curId, width }: { nodes: Skill[]; curId?: string; width: number }) {
+  const pts = nodes.map((_, i) => [width / 2 + TRAIL_X[i % 4], 32 + i * TRAIL_H]);
+  const seg = (i: number) => {
+    const [ax, ay] = pts[i - 1];
+    const [x, y] = pts[i];
+    return `C${ax} ${ay + 52} ${x} ${y - 52} ${x} ${y}`;
+  };
+  /* От текущего узла к следующему бежит пунктир (макет: dasharray 2 14,
+     dashoffset → −16 за 1s, линейно, бесконечно). */
+  const localCur = nodes.findIndex((n) => n.id === curId);
+  const h = nodes.length * TRAIL_H;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-y-7 inset-x-0 z-0">
-      <div className="absolute top-0 bottom-0 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-line/70" />
-      {frac > 0 && (
-        <div
-          className="absolute top-0 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-green/45"
-          style={{ height: `${frac * 100}%` }}
-        />
-      )}
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-0" style={{ height: h }}>
+      <svg width={width} height={h} className="absolute top-0 left-1/2 -translate-x-1/2">
+        {pts.slice(1).map((_, i) => (
+          <path
+            key={i}
+            d={`M${pts[i][0]} ${pts[i][1]} ${seg(i + 1)}`}
+            fill="none"
+            stroke="var(--color-line)"
+            strokeWidth={8}
+            strokeLinecap="round"
+          />
+        ))}
+        {localCur > -1 && localCur < nodes.length - 1 && (
+          <path
+            d={`M${pts[localCur][0]} ${pts[localCur][1]} ${seg(localCur + 1)}`}
+            fill="none"
+            stroke="var(--color-green)"
+            strokeWidth={8}
+            strokeLinecap="round"
+            strokeDasharray="2 14"
+            className="animate-[mv_1s_linear_infinite]"
+          />
+        )}
+      </svg>
     </div>
   );
 }
@@ -1037,22 +1068,24 @@ function Node({
   onPick: (s: Skill) => void;
 }) {
   const combo = s.kind === "combo";
-  const size = combo ? 66 : 56;
+  const size = combo ? 72 : 64;
   const dead = st === "locked" || st === "notrainer";
   // «0/6 Proben» под каждым из 39 узлов — шум. Показываем, только когда
   // человек уже что-то сдал по этому узлу, или когда это текущий узел.
+  /* у текущего узла cov не показываем: вторая строка налезает на следующий
+     узел тропы (H=104), а счётчик и так виден в кнопке «Weiter» */
   const showCov =
-    !!cov && (cur || !cov.startsWith("0/")) && st !== "mastered" && !dead;
+    !!cov && !cur && !cov.startsWith("0/") && st !== "mastered" && !dead;
 
   return (
     <div className="relative flex flex-col items-center">
       {cur && (
-        <span className="mb-1 rounded-lg border-2 border-line bg-white px-[7px] py-[1px] text-[10px] font-extrabold tracking-[0.06em] text-green">
+        <span className="mb-1 animate-[bob_1.6s_ease-in-out_infinite] rounded-lg bg-ink px-2 py-1 text-[10px] font-extrabold tracking-[0.1em] text-bg">
           START
         </span>
       )}
       {needsPf && (
-        <span className="mb-1 rounded-lg border-2 border-gold bg-white px-[7px] py-[1px] text-[10px] font-extrabold tracking-[0.06em] text-ink">
+        <span className="mb-1 rounded-lg border-2 border-gold bg-card px-[7px] py-[1px] text-[10px] font-extrabold tracking-[0.06em] text-ink">
           Prüfung
         </span>
       )}
@@ -1064,18 +1097,26 @@ function Node({
         aria-label={`${s.de} — ${st}`}
         style={{ width: size, height: size }}
         className={cn(
-          "relative grid shrink-0 place-items-center transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue",
+          "relative grid shrink-0 place-items-center transition-transform [transition-duration:var(--d2)] [transition-timing-function:var(--spring)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue",
           combo ? "rotate-45 rounded-[18px]" : "rounded-full",
-          cur && "bg-green text-white shadow-[0_4px_0_var(--color-greend)]",
-          !cur && st === "mastered" && "bg-gold text-white shadow-[0_4px_0_var(--color-goldd)]",
-          !cur && st === "review" && "bg-blue text-white shadow-[0_4px_0_var(--color-blued)]",
-          !cur && st === "open" && "border-2 border-green bg-white text-green shadow-[0_4px_0_var(--color-line)]",
-          st === "locked" && "border-2 border-line bg-line/40 shadow-[0_4px_0_var(--color-line)]",
+          cur &&
+            "animate-[halo_2.4s_ease-in-out_infinite] border-[3px] border-transparent bg-green text-on shadow-[0_5px_0_var(--color-greend)]",
+          !cur &&
+            st === "mastered" &&
+            "border-[3px] border-transparent bg-gold text-white shadow-[0_5px_0_var(--color-goldd)]",
+          !cur &&
+            st === "review" &&
+            "border-[3px] border-blue bg-card text-blue shadow-[0_5px_0_var(--color-line)]",
+          !cur &&
+            st === "open" &&
+            "border-[3px] border-green bg-card text-green shadow-[0_5px_0_var(--color-line)]",
+          st === "locked" &&
+            "border-[3px] border-line bg-sf2 text-muted shadow-[0_5px_0_var(--color-line)]",
           st === "notrainer" &&
             (combo
               ? "border-2 border-dashed border-gold bg-transparent"
               : "border-2 border-dashed border-line bg-transparent"),
-          !dead && "active:translate-y-[3px] active:shadow-none",
+          !dead && "hover:scale-[1.08] active:translate-y-[4px] active:shadow-none",
         )}
       >
         {/* пульсация отдельным слоем: box-shadow кнопки должен остаться */}
@@ -1112,7 +1153,7 @@ function Node({
 
       <span
         className={cn(
-          "mt-1 w-[128px] rounded bg-bg px-1 text-center text-[10.5px] leading-[1.2] font-bold",
+          "mt-1 w-full rounded bg-bg px-1 text-center text-[10.5px] leading-[1.2] font-bold",
           combo && "mt-[10px]",
           cur
             ? "text-ink"
@@ -1160,7 +1201,7 @@ function Programm({ m }: { m: M }) {
               {b.de}
               <span className="text-[11px] font-bold text-muted">{b.ru}</span>
             </h2>
-            <div className="card3d overflow-hidden rounded-card border-2 border-line bg-white">
+            <div className="card3d overflow-hidden rounded-card border border-line bg-card">
               {items.map((s, i) => (
                 <Row key={s.id} s={s} m={m} first={i === 0} />
               ))}
@@ -1174,7 +1215,7 @@ function Programm({ m }: { m: M }) {
           Kombinationen
           <span className="text-[11px] font-bold text-gold">{combos.length}</span>
         </h2>
-        <div className="card3d overflow-hidden rounded-card border-2 border-line bg-white">
+        <div className="card3d overflow-hidden rounded-card border border-line bg-card">
           {combos.map((s, i) => (
             <Row key={s.id} s={s} m={m} first={i === 0} />
           ))}

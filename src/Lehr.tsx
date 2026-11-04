@@ -173,7 +173,7 @@ export default function Lehr({
           )}
 
           {card.fehler.length > 0 && (
-            <div className="mt-4 rounded-card border-2 border-line bg-white p-3.5">
+            <div className="mt-4 rounded-card border border-line bg-card p-3.5">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-red">
                 Typische Fehler
               </p>
@@ -200,7 +200,7 @@ export default function Lehr({
           )}
 
           {/* пример по шагам: шаг открывается кнопкой, а не вываливается сразу */}
-          <div className="card3d mt-4 rounded-card border-2 border-line bg-white p-4">
+          <div className="card3d mt-4 rounded-card border border-line bg-card p-4">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
               Beispiel
             </p>

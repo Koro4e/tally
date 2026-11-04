@@ -54,7 +54,7 @@ function Kicker({ children }: { children: React.ReactNode }) {
    читают ровно дважды, поэтому второй файл открывается только после первого. */
 function Audio({ src, label }: { src: string; label: string }) {
   return (
-    <div className="rounded-xl border-2 border-line bg-bg/60 p-3">
+    <div className="rounded-xl border border-line bg-bg/60 p-3">
       <Kicker>{label}</Kicker>
       <audio controls preload="none" src={src} className="mt-1.5 w-full" />
     </div>
@@ -100,7 +100,7 @@ function DiktatRun({ set, onBack, onFinish }: { set: HoerVariant; onBack: () => 
       </p>
       <Audio src={set.audio.diktat} label="Einmal hören — слушай и пиши сразу" />
 
-      <div className="card3d rounded-card border-2 border-line bg-white p-4">
+      <div className="card3d rounded-card border border-line bg-card p-4">
         <Kicker>({checked ? correct : "—"} / {d.answers.length})</Kicker>
         <p className="mt-2 text-[14px] leading-[2.2] font-bold">
           {parts.map((p, k) => {
@@ -142,7 +142,7 @@ function DiktatRun({ set, onBack, onFinish }: { set: HoerVariant; onBack: () => 
             Prüfen
           </button>
         ) : (
-          <div className="mt-3 rounded-xl border-2 border-line bg-bg/60 p-3">
+          <div className="mt-3 rounded-xl border border-line bg-bg/60 p-3">
             <p className="tnum text-[13px] font-extrabold">{correct} / {d.answers.length}</p>
             <p className="mt-1 text-[12px] font-bold">
               Пропущено: {d.answers.filter((_, i) => !res[i] && i !== exampleIdx).join(" · ") || "—"}
@@ -180,7 +180,7 @@ function McRun({ set, onBack, onFinish }: { set: HoerVariant; onBack: () => void
 
   if (done) {
     return (
-      <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+      <div className="card3d rounded-card border border-line bg-card p-6 text-center">
         <p className="tnum text-[44px] leading-none font-extrabold">
           {correct}
           <span className="text-[22px] text-muted"> / {mc.items.length}</span>
@@ -203,7 +203,7 @@ function McRun({ set, onBack, onFinish }: { set: HoerVariant; onBack: () => void
         </span>
       </div>
       <Audio src={set.audio.mc} label={mc.title} />
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <p className="text-[15px] leading-[1.55] font-bold">{cur.q}</p>
         <div className="mt-3 space-y-1.5">
           {cur.options.map((o, oi) => (
@@ -277,7 +277,7 @@ function DialogRun({ set, onBack, onFinish }: { set: HoerVariant; onBack: () => 
 
   if (allDone) {
     return (
-      <div className="card3d rounded-card border-2 border-line bg-white p-6 text-center">
+      <div className="card3d rounded-card border border-line bg-card p-6 text-center">
         <p className="tnum text-[44px] leading-none font-extrabold">
           {correct}
           <span className="text-[22px] text-muted"> / {set.hoer.dialogs.length * 2}</span>
@@ -300,7 +300,7 @@ function DialogRun({ set, onBack, onFinish }: { set: HoerVariant; onBack: () => 
         </span>
       </div>
       <Audio src={set.audio.dialog(di + 1)} label={dlg.title} />
-      <div className="card3d rounded-card border-2 border-line bg-white p-5">
+      <div className="card3d rounded-card border border-line bg-card p-5">
         <p className="text-[15px] leading-[1.55] font-bold">{cur.q}</p>
         <div className="mt-3 space-y-1.5">
           {cur.options.map((o, oi) => (
@@ -401,7 +401,7 @@ export default function DeutschHoer({
             onClick={() => setVariant(i)}
             className={cn(
               "btn3d rounded-xl border-2 px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-[0.08em]",
-              variant === i ? "border-green bg-greenl text-greend [--btn-shadow:var(--color-greend)]" : "border-line bg-white text-muted [--btn-shadow:var(--color-line)]",
+              variant === i ? "border-green bg-greenl text-greend [--btn-shadow:var(--color-greend)]" : "border-line bg-card text-muted [--btn-shadow:var(--color-line)]",
             )}
           >
             {v.label}
@@ -414,7 +414,7 @@ export default function DeutschHoer({
             key={c.id}
             type="button"
             onClick={() => setSection(c.id)}
-            className="flex w-full items-center gap-3 rounded-xl border-2 border-line bg-white px-3 py-2.5 text-left transition hover:border-muted"
+            className="flex w-full items-center gap-3 rounded-xl border border-line bg-card px-3 py-2.5 text-left transition hover:border-muted"
           >
             <span className="shrink-0 rounded bg-gold/25 px-1.5 py-0.5 text-[10px] font-extrabold text-ink">{c.pts}</span>
             <span className="min-w-0 flex-1">
