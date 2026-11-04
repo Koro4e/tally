@@ -1,6 +1,9 @@
-import { callModel, readBody, sseHead, pipeStream } from "../server/core.mjs";
+import { callModel, readBody, sseHead, pipeStream, clientIp, rateLimit, json429 } from "../server/core.mjs";
 
 export default async function handler(req, res) {
+  /* стрим на 1600 токенов — самый «дорогой» маршрут после task */
+  const rl = rateLimit(`chat:${clientIp(req)}`, 10, 60_000);
+  if (!rl.ok) return json429(res, rl.retryAfter);
   const { messages } = await readBody(req);
   sseHead(res);
   const up = await callModel({

@@ -9,9 +9,21 @@ import { join, extname } from "node:path";
 import {
   callModel, lehrCard, generateTask,
   json, readBody, sseHead, pipeStream,
-  MODEL, KIOSAPI_KEY, KIOSAPI_BASE, VISION_MODEL,
+  clientIp, rateLimit, json429, ocrText, bankSize,
+  MODEL, KIOSAPI_KEY,
+  PROVIDERS,
   PORT, HOST, ROOT,
 } from "./core.mjs";
+
+/* Лимит на маршрут: ученику хватает с запасом, боту — нет. */
+const limiter = (req, res, name, limit, windowMs) => {
+  const rl = rateLimit(`${name}:${clientIp(req)}`, limit, windowMs);
+  if (!rl.ok) {
+    json429(res, rl.retryAfter);
+    return false;
+  }
+  return true;
+};
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -66,72 +78,43 @@ const server = createServer(async (req, res) => {
     }
 
     if (path === "/api/health") {
-      return json(res, 200, { ok: true, model: MODEL, ocr: Boolean(KIOSAPI_KEY) });
+      return json(res, 200, {
+        ok: true,
+        model: MODEL,
+        ocr: Boolean(KIOSAPI_KEY),
+        providers: PROVIDERS.length,
+        bank: await bankSize(),
+        uptime: Math.round(process.uptime()),
+      });
     }
 
     /* Фото→OCR: рукописное решение с листа → текст в поле ответа.
        Дальше обычная проверка isCorrect — подтверждение человеком уже
-       внутри: распознанное попадает в РЕДАКТИРУЕМОЕ поле, не сразу в verdict. */
+       внутри: распознанное попадает в РЕДАКТИРУЕМОЕ поле, не сразу в verdict.
+       Логика — в core.mjs (единый источник с api/ocr.mjs). Лимит 6/мин:
+       у kiosapi самого 2 req/min, больше смысла нет. */
     if (path === "/api/ocr" && req.method === "POST") {
       if (!KIOSAPI_KEY) {
         return json(res, 501, { error: "KIOSAPI_KEY не задан — фото-режим отключён" });
       }
-      const { image } = await readBody(req);
+      if (!limiter(req, res, "ocr", 6, 60_000)) return;
+      const { image } = await readBody(req, { maxBytes: 6_000_000 });
       if (!image || !image.startsWith("data:image/")) {
         return json(res, 400, { error: "нет изображения" });
       }
       const t0 = Date.now();
-      /* nemotron-vl — reasoning-модель: при малом max_tokens «мысли» съедают
-         весь лимит и content приходит пустым. 1500 токенов + один автоповтор
-         (лимит kiosapi — 2 запроса/мин, второй заход укладывается). */
-      const ocrOnce = async () => {
-        const r = await fetch(`${KIOSAPI_BASE}/chat/completions`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${KIOSAPI_KEY}`,
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          },
-          body: JSON.stringify({
-            model: VISION_MODEL,
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: "Transcribe the mathematical content of this image exactly as written. One line per line. Keep unicode: − √ ² ³ · π ≥ ≤ ∈. Keep the decimal comma. No commentary, no LaTeX.",
-                  },
-                  { type: "image_url", image_url: { url: image } },
-                ],
-              },
-            ],
-            max_tokens: 1500,
-            temperature: 0,
-          }),
-        });
-        if (!r.ok) {
-          const t = await r.text();
-          throw new Error(`kiosapi ${r.status}: ${t.slice(0, 160)}`);
-        }
-        const out = await r.json();
-        return (out.choices?.[0]?.message?.content || "").trim();
-      };
-      let text = "";
       try {
-        text = await ocrOnce();
-        if (!text) {
-          await new Promise((resolve) => setTimeout(resolve, 1200));
-          text = await ocrOnce();
-        }
+        const text = await ocrText(image);
+        console.log(`[ocr] ${Date.now() - t0}ms, ${text.length} симв.`);
+        return json(res, 200, { text });
       } catch (e) {
         return json(res, 502, { error: e instanceof Error ? e.message : "OCR не удался" });
       }
-      console.log(`[ocr] ${Date.now() - t0}ms, ${text.length} симв.`);
-      return json(res, 200, { text });
     }
 
     if (path === "/api/task" && req.method === "POST") {
+      /* 40/мин: раунд = 6 задач + перегенерации, обычному хватает */
+      if (!limiter(req, res, "task", 40, 60_000)) return;
       const body = await readBody(req);
       const t0 = Date.now();
       const task = await generateTask(body);
@@ -142,6 +125,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (path === "/api/explain" && req.method === "POST") {
+      if (!limiter(req, res, "explain", 30, 60_000)) return;
       const { task, userAnswer } = await readBody(req);
       const user = `Aufgabe: ${task.prompt}
 Richtige Antwort: ${task.answer.join(" oder ")}
@@ -170,6 +154,8 @@ Brüche im Exponenten immer in Klammern: x^(1/2), nicht x^1/2.`,
     }
 
     if (path === "/api/chat" && req.method === "POST") {
+      /* стрим на 1600 токенов — самый «дорогой» маршрут после task */
+      if (!limiter(req, res, "chat", 10, 60_000)) return;
       const { messages } = await readBody(req);
       sseHead(res);
       const up = await callModel({
@@ -185,6 +171,7 @@ Brüche im Exponenten immer in Klammern: x^(1/2), nicht x^1/2.`,
     }
 
     if (path === "/api/lehr" && req.method === "POST") {
+      if (!limiter(req, res, "lehr", 10, 60_000)) return;
       const body = await readBody(req);
       const t0 = Date.now();
       const card = await lehrCard(body);
@@ -193,6 +180,7 @@ Brüche im Exponenten immer in Klammern: x^(1/2), nicht x^1/2.`,
     }
 
     if (path === "/api/mastery" && req.method === "POST") {
+      if (!limiter(req, res, "mastery", 40, 60_000)) return;
       const body = await readBody(req);
       const log = Array.isArray(body.log) ? body.log.slice(0, 12) : [];
       const t0 = Date.now();
@@ -229,6 +217,9 @@ Brüche im Exponenten immer in Klammern: x^(1/2), nicht x^1/2.`,
 
     json(res, 404, { error: "not found" });
   } catch (e) {
+    if (e && e.message === "payload too large") {
+      return json(res, 413, { error: "слишком большое тело запроса" });
+    }
     console.error("[err]", e.stack || e.message);
     if (!res.headersSent) json(res, 500, { error: e.message });
     else res.end();

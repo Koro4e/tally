@@ -1,6 +1,8 @@
-import { callModel, readBody, sseHead, pipeStream } from "../server/core.mjs";
+import { callModel, readBody, sseHead, pipeStream, clientIp, rateLimit, json429 } from "../server/core.mjs";
 
 export default async function handler(req, res) {
+  const rl = rateLimit(`explain:${clientIp(req)}`, 30, 60_000);
+  if (!rl.ok) return json429(res, rl.retryAfter);
   const { task, userAnswer } = await readBody(req);
   const user = `Aufgabe: ${task.prompt}
 Richtige Antwort: ${task.answer.join(" oder ")}

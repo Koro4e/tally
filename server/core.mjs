@@ -877,10 +877,25 @@ const MIME = {
   ".woff2": "font/woff2",
 };
 
-const readBody = (req) =>
+const readBody = (req, { maxBytes = 1_000_000 } = {}) =>
   new Promise((resolve, reject) => {
     let b = "";
-    req.on("data", (c) => (b += c));
+    let size = 0;
+    let dead = false;
+    req.on("data", (c) => {
+      if (dead) return; // хвост потока сливаем, не накапливая
+      size += c.length;
+      if (size > maxBytes) {
+        dead = true;
+        b = "";
+        /* ВАЖНО: не destroy() — он убивает сокет раньше, чем обработчик
+           успевает отправить 413, и клиент видит «connection reset» вместо
+           внятного ответа. Просто перестаём копить и отдаём ошибку. */
+        reject(new Error("payload too large"));
+        return;
+      }
+      b += c;
+    });
     req.on("end", () => {
       try {
         resolve(b ? JSON.parse(b) : {});
@@ -895,6 +910,113 @@ const json = (res, code, obj) => {
   res.writeHead(code, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(obj));
 };
+
+/* ------------------------------------------------------- защита квоты ---
+   Прод открыт всему интернету, а каждый /api/task стоит токенов. Лимиты на IP
+   щедрые для ученика (раунд = 6 задач, объяснение после каждой) и жёсткие
+   для бота. Счётчик в памяти инстанса: на Vercel это не глобальный потолок,
+   но тёплый инстанс обычно обслуживает весь трафик, поэтому квоту это
+   спасает. ---------------------------------------------------------------- */
+const clientIp = (req) => {
+  const xf = req.headers["x-forwarded-for"];
+  if (typeof xf === "string" && xf.length) return xf.split(",")[0].trim();
+  if (typeof req.headers["x-real-ip"] === "string") return req.headers["x-real-ip"];
+  return req.socket?.remoteAddress || "static";
+};
+
+const RATE = new Map();
+
+function rateLimit(key, limit, windowMs) {
+  const now = Date.now();
+  const arr = (RATE.get(key) ?? []).filter((t) => now - t < windowMs);
+  if (arr.length >= limit) {
+    RATE.set(key, arr);
+    return { ok: false, retryAfter: Math.ceil((windowMs - (now - arr[0])) / 1000) };
+  }
+  arr.push(now);
+  RATE.set(key, arr);
+  /* карта не должна расти бесконечно: выметаем давно молчащие ключи */
+  if (RATE.size > 5000) {
+    for (const [k, v] of RATE) {
+      if (!v.some((t) => now - t < windowMs)) RATE.delete(k);
+    }
+  }
+  return { ok: true, retryAfter: 0 };
+}
+
+const json429 = (res, retryAfter) => {
+  res.writeHead(429, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Retry-After": String(Math.max(1, retryAfter)),
+  });
+  res.end(JSON.stringify({ error: "слишком часто — подожди немного" }));
+};
+
+/* --- OCR фото→текст: единый источник для локального сервера и api/ocr.mjs.
+   Раньше логика жила в двух копиях и расходилась. Таймаут обязателен: без
+   него зависший kiosapi держал соединение (и слот) вечно. ---------------- */
+async function ocrText(image) {
+  const ocrOnce = async () => {
+    const r = await fetch(`${KIOSAPI_BASE}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${KIOSAPI_KEY}`,
+        "Content-Type": "application/json",
+        /* Cloudflare режет клиентов без браузерного UA (код 1010) */
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+      body: JSON.stringify({
+        model: VISION_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Transcribe the mathematical content of this image exactly as written. One line per line. Keep unicode: − √ ² ³ · π ≥ ≤ ∈. Keep the decimal comma. No commentary, no LaTeX.",
+              },
+              { type: "image_url", image_url: { url: image } },
+            ],
+          },
+        ],
+        /* reasoning-модель: при малом max_tokens «мысли» съедают лимит и
+           content приходит пустым. 1500 + один автоповтор (у kiosapi
+           2 req/min, второй заход укладывается). */
+        max_tokens: 1500,
+        temperature: 0,
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(`kiosapi ${r.status}: ${t.slice(0, 160)}`);
+    }
+    const out = await r.json();
+    return (out.choices?.[0]?.message?.content || "").trim();
+  };
+  let text = await ocrOnce();
+  if (!text) {
+    await sleep(1200);
+    text = await ocrOnce();
+  }
+  return text;
+}
+
+/* --- размер банка для /api/health: читаем с TTL, файл меняется только
+   сборкой, но после неё счётчик должен обновиться сам -------------------- */
+let bankCountAt = 0;
+let bankCount = 0;
+async function bankSize() {
+  if (Date.now() - bankCountAt < 300_000) return bankCount;
+  try {
+    const raw = await readFile(join(ROOT, "public", "bank.json"), "utf8");
+    bankCount = JSON.parse(raw).length;
+    bankCountAt = Date.now();
+  } catch {
+    bankCount = 0;
+  }
+  return bankCount;
+}
 
 function sseHead(res) {
   res.writeHead(200, {
@@ -935,9 +1057,10 @@ async function pipeStream(res, upstream) {
 
 /* экспорт для server/index.mjs (локальный) и api/*.mjs (Vercel Functions) */
 export {
-  ROOT, MODEL, PORT, HOST,
+  ROOT, MODEL, PORT, HOST, PROVIDERS,
   KIOSAPI_KEY, KIOSAPI_BASE, VISION_MODEL,
   GROQ_KEYS, GROQ_MODELS,
   callModel, generateTask, lehrCard, judgeRound,
   json, readBody, sseHead, pipeStream,
+  clientIp, rateLimit, json429, ocrText, bankSize,
 };

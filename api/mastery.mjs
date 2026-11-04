@@ -1,6 +1,8 @@
-import { json, readBody, judgeRound } from "../server/core.mjs";
+import { json, readBody, judgeRound, clientIp, rateLimit, json429 } from "../server/core.mjs";
 
 export default async function handler(req, res) {
+  const rl = rateLimit(`mastery:${clientIp(req)}`, 40, 60_000);
+  if (!rl.ok) return json429(res, rl.retryAfter);
   const body = await readBody(req);
   const log = Array.isArray(body.log) ? body.log.slice(0, 12) : [];
   const t0 = Date.now();
