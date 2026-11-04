@@ -945,7 +945,8 @@ verify ловит 500 — это не регресс.
   Chatterbox (американский акцент). Финал: **клон живого немецкого диктора**
   — референс 32 с из LibriVox (public domain, «Kiliani-Volksfest» озвучка
   Wikipedia, спикер Renredam). Пол дерева референсов с проверкой лицензий
-  и pitch-анализом пола спикера — в `D:\AI-Workspace	ts-localefs\live\`.
+  и pitch-анализом пола спикера — в `D:\AI-Workspace	ts-local
+efs\live\`.
 - Настройки, которые дали «диктора, а не актёра»: exaggeration 0.5 /
   cfg_weight 0.5, seed 42 (проверено: генерация бит-в-бит воспроизводима),
   генерация ПО ПРЕДЛОЖЕНИЯМ + склейка ffmpeg с фиксированными паузами
@@ -1538,3 +1539,10 @@ OCR требует сервера → работает на localhost (и люб
   (Светлая/Тёмная/Системная сегментами), Маскот, Звук.
 - Дефолт темы — светлая (просьба хозяина).
 - Грабли: git rm --cached для временных файлов, попавших в коммит.
+
+(12) 04.11.2026 — Дизайн-система + бекенд-харденинг
+- Фронт: PageHeader на всех экранах (Mathematik/Deutsch/Einstellungen), одна колонна 680px, гексы вычищены из JSX (text-muted/* токены), тема по умолчанию — светлая, дубли заголовков убраны, overflow 390px в Deutsch-Prüfung починен (grid-cols-2), MascotPicker noTitle.
+- Бекенд (server/core.mjs): readBody с лимитом (1МБ дефолт, OCR 6МБ, 413 без разрыва сокета), rate-limit на IP (task 40/мин, chat 10, explain 30, lehr 10, mastery 40, ocr 6) с Retry-After, ocrText() единый источник с AbortSignal.timeout(30s), bankSize() с TTL, честный /api/health (providers/bank/uptime).
+- Проверено живьём: 6x400→429 Retry-After:60; 413 JSON; 77 тестов, build чистый.
+- Коммиты: f10de6d (фронт), bee915d (бекенд), 6c65942 (банк 727 + handoff). Все на origin/main.
+- ВНИМАНИЕ: прод https://tally.koro4e.eu.cc НЕ обновился — Vercel CLI вылогинен, GitHub-хук деплоя не срабатывает (deployments пуст). Нужно: vercel login или новый токен vercel.com/account/tokens → потом npx vercel --prod. Промпт для сильной модели: PROMPT-DESIGN.md (фулл-визуал, анимации разрешены).
