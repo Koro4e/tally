@@ -362,66 +362,65 @@ sup {
    ТЁМНАЯ ТЕМА: включается data-theme="dark" на <html> (см. lib/theme.ts).
    Акценты в тёмной теме приглушены — на тёмном фоне насыщенные зелёный/синий
    читаются как неон (жалоба хозяина), поэтому у каждого маскота своя
-   смягчённая пара в dark.
-   Правило одно: поверхности и текст темнеют, семантика (green/blue/gold/red
-   и темы маскотов) остаётся. bg-white перекрывается точечным правилом —
-   трогать --color-white нельзя: text-white сидит на цветных кнопках.
+   смягчённая пара в dark. Все правила плоские: CSS-нестинг с :root внутри
+   :root не селектится.
    ========================================================================== */
 :root[data-theme="dark"] {
-  :root {
-    --color-bg: #131f24;
-    --color-ink: #f1f7fb;
-    --color-muted: #8fa1ab;
-    --color-line: #37464f;
-  }
-  body { background: var(--color-bg); color: var(--color-ink); }
-  .bg-white { background-color: #1b2b31; }
-  .btn3d-white { background-color: #1b2b31; color: var(--color-ink); }
-  .btn3d-white:hover { background-color: #22343c; }
-  /* светлые пастельные подложки → тёмные тонированные */
-  .bg-greenl { background-color: #16323c; }
-  .text-greend { color: var(--color-green); }
-  .hover\:bg-black\/\[0\.04\]:hover { background-color: rgba(255, 255, 255, 0.06); }
-  .bg-\[\#fafafa\] { background-color: #22343c; }
-  .bg-\[\#f7f7f7\] { background-color: #22343c; }
-  .bg-\[\#ececec\] { background-color: #2a3b44; }
-  .border-\[\#dcdcdc\] { border-color: var(--color-line); }
-  .text-\[\#c2c2c2\] { color: #6b7f8a; }
-  .text-\[\#cfcfcf\] { color: #5c6f79; }
-  .text-\[\#d4d4d4\] { color: #5c6f79; }
-  .text-\[\#afafaf\] { color: #8fa1ab; }
-  .bg-\[\#d7ffb8\] { background-color: #1f4d1f; }
-  .bg-\[\#ffdfe0\] { background-color: #4d1f24; }
-  .bg-gold\/15 { background-color: rgba(255, 200, 0, 0.12); }
-  .bg-gold\/25 { background-color: rgba(255, 200, 0, 0.18); }
-  .bg-blue\/10 { background-color: rgba(28, 176, 246, 0.12); }
-  /* ---- приглушённые акценты (было «ядовито») ---- */
-  :root { --color-gold: #e8bd45; --color-goldd: #c49c2e; --color-blue: #5aabdc; }
-
-  :root[data-mascot="pip"], :root:not([data-mascot]) {
-    --color-green: #74c94a;
-    --color-greend: #5da53a;
-    --color-greenl: #1d3a24;
-  }
-  :root[data-mascot="hoot"] {
-    --color-green: #57b0e8;
-    --color-greend: #4392c4;
-    --color-greenl: #14303f;
-  }
-  :root[data-mascot="mochi"] {
-    --color-green: #f2a355;
-    --color-greend: #d18a3f;
-    --color-greenl: #3d2a14;
-  }
-  :root[data-mascot="bolt"] {
-    --color-green: #c39bee;
-    --color-greend: #a379c9;
-    --color-greenl: #2a1f3d;
-  }
-  :root[data-mascot="gloop"] {
-    --color-green: #f49cb9;
-    --color-greend: #d97e9c;
-    --color-greenl: #3d1f2a;
-  }
+  --color-bg: #131f24;
+  --color-ink: #f1f7fb;
+  --color-muted: #8fa1ab;
+  --color-line: #37464f;
+  /* приглушённые акценты (было «ядовито») */
+  --color-gold: #e8bd45;
+  --color-goldd: #c49c2e;
+  --color-blue: #5aabdc;
 }
+:root[data-theme="dark"] body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+:root[data-theme="dark"] .bg-white { background-color: #1b2b31; }
+:root[data-theme="dark"] .btn3d-white { background-color: #1b2b31; color: var(--color-ink); }
+:root[data-theme="dark"] .btn3d-white:hover { background-color: #22343c; }
+:root[data-theme="dark"] .bg-greenl { background-color: var(--color-greenl); }
+:root[data-theme="dark"] .hover\:bg-black\/\[0\.04\]:hover { background-color: rgba(255, 255, 255, 0.06); }
+:root[data-theme="dark"] .bg-\[\#fafafa\] { background-color: #22343c; }
+:root[data-theme="dark"] .bg-\[\#f7f7f7\] { background-color: #22343c; }
+:root[data-theme="dark"] .bg-\[\#ececec\] { background-color: #2a3b44; }
+:root[data-theme="dark"] .border-\[\#dcdcdc\] { border-color: var(--color-line); }
+:root[data-theme="dark"] .text-\[\#c2c2c2\] { color: #6b7f8a; }
+:root[data-theme="dark"] .text-\[\#cfcfcf\] { color: #5c6f79; }
+:root[data-theme="dark"] .text-\[\#d4d4d4\] { color: #5c6f79; }
+:root[data-theme="dark"] .text-\[\#afafaf\] { color: #8fa1ab; }
+:root[data-theme="dark"] .bg-\[\#d7ffb8\] { background-color: #1f4d1f; }
+:root[data-theme="dark"] .bg-\[\#ffdfe0\] { background-color: #4d1f24; }
+:root[data-theme="dark"] .bg-gold\/15 { background-color: rgba(255, 200, 0, 0.12); }
+:root[data-theme="dark"] .bg-gold\/25 { background-color: rgba(255, 200, 0, 0.18); }
+:root[data-theme="dark"] .bg-blue\/10 { background-color: rgba(28, 176, 246, 0.12); }
+
+/* приглушённые акценты по маскоту (перекрывают светлые блоки порядком) */
+:root[data-theme="dark"]:not([data-mascot]), :root[data-theme="dark"][data-mascot="pip"] {
+  --color-green: #74c94a;
+  --color-greend: #5da53a;
+  --color-greenl: #1d3a24;
+}
+:root[data-theme="dark"][data-mascot="hoot"] {
+  --color-green: #57b0e8;
+  --color-greend: #4392c4;
+  --color-greenl: #14303f;
+}
+:root[data-theme="dark"][data-mascot="mochi"] {
+  --color-green: #f2a355;
+  --color-greend: #d18a3f;
+  --color-greenl: #3d2a14;
+}
+:root[data-theme="dark"][data-mascot="bolt"] {
+  --color-green: #c39bee;
+  --color-greend: #a379c9;
+  --color-greenl: #2a1f3d;
+}
+:root[data-theme="dark"][data-mascot="gloop"] {
+  --color-green: #f49cb9;
+  --color-greend: #d97e9c;
+  --color-greenl: #3d1f2a;
 }
