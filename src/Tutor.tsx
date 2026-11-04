@@ -124,6 +124,20 @@ export default function Tutor({
   const [chat, setChat] = useState<Msg[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [log, setLog] = useState<RoundLog[]>([]);
+  /* режим сложности (хозяин, 04.11): «лайт» — как было, для телефона;
+     «хардкор» — только верх банка (L5, приоритет комбинированных форм
+     k-*) и +2 к уровню живой генерации. Хранится в localStorage. */
+  const [diff, setDiff] = useState<"lite" | "hard">(() =>
+    localStorage.getItem("tally.diff") === "hard" ? "hard" : "lite",
+  );
+  const setDiffSave = (v: "lite" | "hard") => {
+    setDiff(v);
+    try {
+      localStorage.setItem("tally.diff", v);
+    } catch {
+      /* приватный режим — режим просто не сохранится */
+    }
+  };
   /* живой маскот в шапке раунда: короткая реакция на каждый ответ */
   const mascot = useMascot();
   const [mascotMood, setMascotMood] = useState<MascotMood>("idle");
@@ -258,9 +272,18 @@ export default function Tutor({
       /* из неиспользованных задач формы берём ближайшую по уровню:
          банк сгенерирован на Stufe 4–5, и лёгкому узлу не надо отдавать
          самое тяжёлое первым */
+      const hardRank = (t: GenTask): number => {
+        /* хардкор: чем выше уровень и «комбинированнее» форма (k-*), тем
+           первее; лайт: как раньше — ближайший к целевому уровню */
+        if (diff === "hard") {
+          const combo = (t.variante ?? "").startsWith("k-") ? 5 : 0;
+          return -(10 * (t.level ?? 4) + combo);
+        }
+        return Math.abs((t.level ?? 4) - level);
+      };
       const cand = list
         .filter((t) => t.id && (!variante || t.variante === variante.id) && !usedBank.has(t.id))
-        .sort((a, b) => Math.abs((a.level ?? 4) - level) - Math.abs((b.level ?? 4) - level))[0];
+        .sort((a, b) => hardRank(a) - hardRank(b))[0];
       if (!cand?.id) return null;
       usedBank.add(cand.id);
       try {
@@ -270,7 +293,7 @@ export default function Tutor({
       }
       return { ...cand, verified: true, attempts: 0 };
     },
-    [skill.id, usedBank],
+    [skill.id, usedBank, diff],
   );
 
   /* ------------------------------------------------------------- план -----
@@ -301,7 +324,11 @@ export default function Tutor({
        замеренная сложность, и требовать «Stufe 4» от формы, на которой
        человек ещё ни разу не был, — значит гарантировать провал. */
     const d = variante ? difficulty(calibRef.current[ckey(skill.id, variante.id)]) : 0.45;
-    const level = levelFor(p0, d);
+    /* хардкор: базовый уровень поднимается на 2 (клампится до 6 — спеки
+       отдают свою самую тяжёлую форму), банк в этом режиме сортируется
+       по убыванию сложности с приоритетом комбинированных форм */
+    const boost = diff === "hard" ? 2 : 0;
+    const level = Math.min(6, levelFor(p0, d) + boost);
     const next = () => {
       const fromBank = takeFromBank(variante, level);
       return fromBank ? Promise.resolve(fromBank) : generateTask({ ...req(), level, variante });
@@ -316,7 +343,7 @@ export default function Tutor({
     });
     tail.current = guarded.catch(() => undefined);
     return guarded;
-  }, [req, nextVariant, skill.id, p0]);
+  }, [req, nextVariant, skill.id, p0, diff]);
 
   const fill = useCallback(
     (n: number) => {
@@ -576,7 +603,32 @@ export default function Tutor({
             ← Weg
           </button>
           <span className="min-w-0 truncate text-[13px] font-extrabold">{skill.de}</span>
-          <Mascot char={mascot} mood={mascotMood} className="ml-auto h-[44px] w-auto shrink-0" />
+          {/* переключатель режима сложности — под рукой, но не мешает */}
+          <div className="ml-auto flex shrink-0 items-center rounded-lg border-2 border-line bg-white p-0.5 text-[10px] font-extrabold">
+            <button
+              type="button"
+              onClick={() => setDiffSave("lite")}
+              aria-pressed={diff === "lite"}
+              className={cn(
+                "rounded-md px-2 py-1 transition-colors",
+                diff === "lite" ? "bg-green text-white" : "text-muted hover:text-ink",
+              )}
+            >
+              Лайт
+            </button>
+            <button
+              type="button"
+              onClick={() => setDiffSave("hard")}
+              aria-pressed={diff === "hard"}
+              className={cn(
+                "rounded-md px-2 py-1 transition-colors",
+                diff === "hard" ? "bg-red text-white" : "text-muted hover:text-ink",
+              )}
+            >
+              Хардкор
+            </button>
+          </div>
+          <Mascot char={mascot} mood={mascotMood} className="h-[44px] w-auto shrink-0" />
           <span className="tnum shrink-0 text-[13px] font-extrabold">{mmss(elapsed)}</span>
         </div>
 
