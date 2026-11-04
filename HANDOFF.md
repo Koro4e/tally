@@ -1455,3 +1455,46 @@ OCR требует сервера → работает на localhost (и люб
 
 Приёмка: tsc чисто · сборка 1008.02 kB / 292.94 kB gzip · тесты 77 ·
 сервер перезапущен с ключом, OCR end-to-end зелёный.
+
+## Обновление 04.11.2026 (8) — ПОЛНЫЙ СТЕК НА ПРОДАКШЕНЕ
+
+### Хронология бесплаток (все протестировано живьём)
+
+- Render free: с 2025 требует карту даже на free (402 от API) — мимо.
+- HF Spaces: Docker-тип требует PRO-подписку (402) — мимо (Static free, но
+  наш бекенд не статика). Инструменты остались: tools/hf-deploy.py,
+  render.yaml, .vercelignore — пригодятся, когда политики поменяются.
+- GitHub: репо Koro4e/tally создан и запушен (токен хозяина; СЕЙЧАС PUBLIC —
+  секретов нет, .env.local в гит не попадает; можно сделать private обратно).
+- **Победитель: Vercel Serverless Functions** — аккаунт уже был, карты нет.
+
+### Рефактор сервера
+
+- server/core.mjs — вся логика (env, провайдеры, callModel, generateTask,
+  lehrCard, judgeRound, ocr-хелперы, json/readBody/sseHead/pipeStream).
+- server/index.mjs — тонкий локальный сервер: маршруты + статика dist/ + SPA-
+  фолбэк. Локальное поведение не изменилось (health/статика/аудио проверены).
+- api/*.mjs — 7 функций Vercel (health/task/explain/chat/lehr/mastery/ocr),
+  импортируют тот же core.mjs. SSE-роуты стримят на Vercel без изменений.
+- vercel.json: buildCommand npm run build, outputDirectory dist, maxDuration 60.
+- Грабли расщепления: env/HOST/ROOT/existsSync/extname не экспортировались в
+  index.mjs (3 итерации фиксов, всё словлено тестами curl).
+
+### Прод
+
+- Ключи GROQ_KEYS/IFM_API_KEY/KIOSAPI_KEY залиты в Vercel env (через CLI,
+  значения из .env.local, в чат не светились) + редеплой.
+- Проверено снаружи: /api/health → {ok,ocr:true}; /api/ocr на наклонённой
+  зашумлённой картинке → точная транскрипция; /api/task → корректная задача
+  с Groq (2x²-4x-6=0, ответ 3 ✓).
+- **ИТОГ: https://tally-pink-eight.vercel.app — фронт + бек одним URL.**
+  С телефона работает ВСЁ: маскоты, Hör вариант 1+2, хардкор-ввод,
+  фото→OCR, живая генерация, объяснения, чат.
+
+### Хвосты
+
+- GitHub-репо теперь public (для Render по URL — не пригодилось). Можно
+  вернуть private: Settings → Danger Zone → Change visibility.
+- render.yaml/hf-deploy.py в репо — задел на будущее, сейчас не используются.
+- Пробуждение: Vercel functions не «спят» как Render — холодный старт ~1 c,
+  wake-on-open не нужен.

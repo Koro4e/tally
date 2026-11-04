@@ -1,0 +1,8 @@
+node_modules
+dist
+blender-out
+shots
+hf-space
+server.log
+*.log
+.env.local
