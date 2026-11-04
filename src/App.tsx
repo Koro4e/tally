@@ -232,11 +232,23 @@ export default function App() {
   return (
     <div className="min-h-screen bg-bg pb-[84px] lg:pb-12">
       <ShellHeader subject={subject} onSubject={setSubject} view={view} onView={setView} m={m} />
+      <ShellSidebar
+        subject={subject}
+        onSubject={setSubject}
+        view={view}
+        onView={setView}
+        matheView={matheView}
+        onMatheView={setMatheView}
+        deView={deView}
+        onDeView={setDeView}
+        m={m}
+      />
+      <div className="lg:pl-[264px]">
 
       {subject === "mathe" ? (
-        <div className="mx-auto flex w-full max-w-[880px] items-start gap-10 lg:px-6">
-          <div className="min-w-0 flex-1 lg:w-[430px] lg:max-w-[430px] lg:shrink-0">
-            <div className="px-4 lg:px-0">
+        <div className="mx-auto flex w-full max-w-[1160px] items-start gap-8 px-4 lg:px-8">
+          <div className="min-w-0 flex-1 lg:max-w-[540px] lg:shrink-0">
+            <div className="px-0 lg:hidden">
               <SubBar
                 items={[
                   { id: "weg", de: "Weg" },
@@ -265,8 +277,8 @@ export default function App() {
           )}
         </div>
       ) : (
-        <div className="mx-auto w-full max-w-[672px]">
-          <div className="px-4">
+        <div className="mx-auto w-full max-w-[720px] px-4 lg:px-0">
+          <div className="lg:hidden">
             <SubBar
               items={[
                 { id: "grammatik", de: "Grammatik" },
@@ -283,6 +295,7 @@ export default function App() {
         </div>
       )}
 
+      </div>
       <TabBar subject={subject} onSubject={setSubject} />
     </div>
   );
@@ -358,6 +371,114 @@ function SubBar({
   );
 }
 
+/* -------------------------------------------------------------- сайдбар ---
+   Канон десктопа (2026): левый сайдбар 240px + сфокусированная центральная
+   колонна + правая панель. Сайдбар отвечает на «где я и куда идти», центр —
+   на «что делаю», правая панель — на «как дела». На телефоне всё это решают
+   шапка и нижний таб-бар, поэтому сайдбар рендерится только на lg+. */
+
+function ShellSidebar({
+  subject,
+  onSubject,
+  view,
+  onView,
+  matheView,
+  onMatheView,
+  deView,
+  onDeView,
+  m,
+}: {
+  subject: Subject;
+  onSubject: (s: Subject) => void;
+  view: "weg" | "programm";
+  onView: (v: "weg" | "programm") => void;
+  matheView: "weg" | "pruefung";
+  onMatheView: (v: "weg" | "pruefung") => void;
+  deView: "grammatik" | "woerter" | "pruefung";
+  onDeView: (v: "grammatik" | "woerter" | "pruefung") => void;
+  m: M;
+}) {
+  const c = counts(m);
+  const navCls = (on: boolean) =>
+    cn(
+      "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13.5px] font-extrabold transition-colors",
+      on ? "bg-greenl text-greend" : "text-ink/70 hover:bg-black/[0.04] hover:text-ink",
+    );
+  const dot = (on: boolean) =>
+    cn("h-2 w-2 shrink-0 rounded-full", on ? "bg-green" : "bg-line");
+  return (
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col border-r-2 border-line bg-white px-4 pt-5 pb-4 lg:flex">
+      <div className="flex items-baseline gap-2 px-1">
+        <span className="text-[20px] font-extrabold tracking-[-0.02em] text-green">TALLY</span>
+        <span className="text-[9px] font-bold text-[#cfcfcf]">{__BUILD__}</span>
+      </div>
+
+      <nav className="mt-6 space-y-1" aria-label="Предметы">
+        {SUBJECTS.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => onSubject(s.id)}
+            aria-current={subject === s.id}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-xl border-2 px-3 py-3 text-left text-[14px] font-extrabold transition-colors",
+              subject === s.id
+                ? "border-green bg-greenl text-greend"
+                : "border-transparent text-ink/70 hover:border-line hover:bg-black/[0.03]",
+            )}
+          >
+            {s.icon}
+            {s.de}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-6 px-3 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
+        {subject === "mathe" ? "Mathematik" : "Deutsch"}
+      </div>
+      <nav className="mt-2 space-y-1" aria-label="Разделы">
+        {subject === "mathe" ? (
+          <>
+            <button type="button" onClick={() => { onMatheView("weg"); onView("weg"); }} className={navCls(matheView === "weg" && view === "weg")}>
+              <span className={dot(matheView === "weg" && view === "weg")} /> Weg
+            </button>
+            <button type="button" onClick={() => { onMatheView("weg"); onView("programm"); }} className={navCls(matheView === "weg" && view === "programm")}>
+              <span className={dot(matheView === "weg" && view === "programm")} /> Programm
+            </button>
+            <button type="button" onClick={() => onMatheView("pruefung")} className={navCls(matheView === "pruefung")}>
+              <span className={dot(matheView === "pruefung")} /> Prüfung
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={() => onDeView("grammatik")} className={navCls(deView === "grammatik")}>
+              <span className={dot(deView === "grammatik")} /> Grammatik
+            </button>
+            <button type="button" onClick={() => onDeView("woerter")} className={navCls(deView === "woerter")}>
+              <span className={dot(deView === "woerter")} /> Wörter
+            </button>
+            <button type="button" onClick={() => onDeView("pruefung")} className={navCls(deView === "pruefung")}>
+              <span className={dot(deView === "pruefung")} /> Prüfung
+            </button>
+          </>
+        )}
+      </nav>
+
+      <div className="mt-auto rounded-2xl border-2 border-line bg-bg p-3">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
+          {daysLeft()} Tage bis Prüfung
+        </p>
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
+          <div className="h-full bg-green transition-[width] duration-500" style={{ width: `${Math.round(progress(m) * 100)}%` }} />
+        </div>
+        <p className="tnum mt-1.5 text-[11px] font-bold text-muted">
+          {c.done} / {c.total} Knoten
+        </p>
+      </div>
+    </aside>
+  );
+}
+
 function ShellHeader({
   subject,
   onSubject,
@@ -374,7 +495,7 @@ function ShellHeader({
   const c = counts(m);
   const [snd, setSnd] = useState(soundOn);
   return (
-    <header className="sticky top-0 z-20 bg-bg">
+    <header className="sticky top-0 z-20 bg-bg lg:hidden">
       <div className="mx-auto flex max-w-[880px] items-center gap-3 px-4 pt-4 pb-1 lg:px-6">
         <span className="text-[19px] font-extrabold tracking-[-0.02em] text-green">TALLY</span>
         <span className="text-[9px] font-bold text-[#cfcfcf]">{__BUILD__}</span>
