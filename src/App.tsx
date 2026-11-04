@@ -21,6 +21,7 @@ import {
 } from "@/lib/mastery";
 import { cn } from "@/utils/cn";
 import { soundOn, setSound, toggleClick } from "@/lib/sfx";
+import { getTheme, cycleTheme, subscribe, type ThemeMode } from "@/lib/theme";
 import Exam, { lastExam } from "@/Exam";
 import Deutsch from "@/Deutsch";
 import SectionTest from "@/SectionTest";
@@ -384,6 +385,61 @@ function SubBar({
    на «что делаю», правая панель — на «как дела». На телефоне всё это решают
    шапка и нижний таб-бар, поэтому сайдбар рендерится только на lg+. */
 
+/* ------------------------------------------------------- тема (кнопка) ---
+   Круг: auto (по системе) → тёмная → светлая. Иконка показывает, что выбрано;
+   подпись — какой режим активен. Живёт в сайдбаре (десктоп) и в шапке
+   (телефон), рядом с кнопкой звука. */
+
+const THEME_META: Record<ThemeMode, { icon: React.ReactNode; label: string }> = {
+  auto: {
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+    label: "Авто",
+  },
+  dark: {
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M20 13.5A8.5 8.5 0 0 1 10.5 4 7.5 7.5 0 1 0 20 13.5Z" />
+      </svg>
+    ),
+    label: "Тёмная",
+  },
+  light: {
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+        <circle cx="12" cy="12" r="4.4" />
+        <path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3 19 19M19 5l-1.7 1.7M6.7 17.3 5 19" />
+      </svg>
+    ),
+    label: "Светлая",
+  },
+};
+
+function ThemeToggle({ compact = false }: { compact?: boolean }) {
+  const [mode, setMode] = useState<ThemeMode>(getTheme());
+  useEffect(() => subscribe(() => setMode(getTheme())), []);
+  const meta = THEME_META[mode];
+  return (
+    <button
+      type="button"
+      onClick={() => cycleTheme()}
+      aria-label={"Тема: " + meta.label + " (переключить)"}
+      title={"Тема: " + meta.label + " — переключить"}
+      className={cn(
+        "flex items-center gap-2 rounded-xl border-2 border-line bg-white px-3 text-ink transition-colors hover:bg-black/[0.04]",
+        compact ? "h-[34px] w-[34px] justify-center" : "w-full py-2.5 text-[12.5px] font-extrabold",
+      )}
+    >
+      <span className="text-green">{meta.icon}</span>
+      {!compact && <span className="ml-auto">{meta.label}</span>}
+    </button>
+  );
+}
+
 function ShellSidebar({
   subject,
   onSubject,
@@ -481,6 +537,12 @@ function ShellSidebar({
         <p className="tnum mt-1.5 text-[11px] font-bold text-muted">
           {c.done} / {c.total} Knoten
         </p>
+        <div className="mt-3 border-t-2 border-line pt-3">
+          <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
+            Оформление
+          </p>
+          <ThemeToggle />
+        </div>
       </div>
     </aside>
   );
@@ -537,6 +599,8 @@ function ShellHeader({
             )}
           </svg>
         </button>
+        <ThemeToggle compact />
+
         <div className="hidden items-center gap-1 lg:flex">
           {SUBJECTS.map((s) => (
             <button

@@ -359,12 +359,15 @@ sup {
   --color-greenl: #ffe4ef;
 }
 /* ============================================================================
-   ТЁМНАЯ ТЕМА (по системной, prefers-color-scheme).
+   ТЁМНАЯ ТЕМА: включается data-theme="dark" на <html> (см. lib/theme.ts).
+   Акценты в тёмной теме приглушены — на тёмном фоне насыщенные зелёный/синий
+   читаются как неон (жалоба хозяина), поэтому у каждого маскота своя
+   смягчённая пара в dark.
    Правило одно: поверхности и текст темнеют, семантика (green/blue/gold/red
    и темы маскотов) остаётся. bg-white перекрывается точечным правилом —
    трогать --color-white нельзя: text-white сидит на цветных кнопках.
    ========================================================================== */
-@media (prefers-color-scheme: dark) {
+:root[data-theme="dark"] {
   :root {
     --color-bg: #131f24;
     --color-ink: #f1f7fb;
@@ -392,4 +395,33 @@ sup {
   .bg-gold\/15 { background-color: rgba(255, 200, 0, 0.12); }
   .bg-gold\/25 { background-color: rgba(255, 200, 0, 0.18); }
   .bg-blue\/10 { background-color: rgba(28, 176, 246, 0.12); }
+  /* ---- приглушённые акценты (было «ядовито») ---- */
+  :root { --color-gold: #e8bd45; --color-goldd: #c49c2e; --color-blue: #5aabdc; }
+
+  :root[data-mascot="pip"], :root:not([data-mascot]) {
+    --color-green: #74c94a;
+    --color-greend: #5da53a;
+    --color-greenl: #1d3a24;
+  }
+  :root[data-mascot="hoot"] {
+    --color-green: #57b0e8;
+    --color-greend: #4392c4;
+    --color-greenl: #14303f;
+  }
+  :root[data-mascot="mochi"] {
+    --color-green: #f2a355;
+    --color-greend: #d18a3f;
+    --color-greenl: #3d2a14;
+  }
+  :root[data-mascot="bolt"] {
+    --color-green: #c39bee;
+    --color-greend: #a379c9;
+    --color-greenl: #2a1f3d;
+  }
+  :root[data-mascot="gloop"] {
+    --color-green: #f49cb9;
+    --color-greend: #d97e9c;
+    --color-greenl: #3d1f2a;
+  }
+}
 }
