@@ -1,0 +1,24 @@
+# Render Blueprint — сервис создаётся из этого файла одним кликом.
+# Free-план: засыпает после 15 минут простоя, будится первым запросом (~30-60 с).
+# Секреты (sync: false) вводятся руками в дашборде при создании.
+# HOST=0.0.0.0 обязателен: локальный дефолт 127.0.0.1 снаружи недоступен.
+services:
+  - type: web
+    name: tally-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm run server
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOST
+        value: 0.0.0.0
+      - key: GROQ_KEYS
+        sync: false
+      - key: IFM_API_KEY
+        sync: false
+      - key: KIOSAPI_KEY
+        sync: false

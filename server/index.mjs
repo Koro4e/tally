@@ -1114,8 +1114,11 @@ Brüche im Exponenten immer in Klammern: x^(1/2), nicht x^1/2.`,
   }
 });
 
-/* Только 127.0.0.1: приложение локальное, а /api расходует квоту LLM —
-   наружу его слушать нельзя (проверка: `netstat -an | findstr 8787`). */
+/* Локально — только 127.0.0.1: /api расходует квоту LLM, наружу слушать
+   нельзя (проверка: `netstat -an | findstr 8787`). На хостинге (Render и т.п.)
+   нужен 0.0.0.0 — там включаем явным HOST=0.0.0.0 в env, локально по
+   умолчанию ничего не меняется. */
+const HOST = process.env.HOST || env.HOST || "127.0.0.1";
 server.on("error", (err) => {
   if (err && err.code === "EADDRINUSE") {
     console.error(`порт ${PORT} занят — либо уже запущен TALLY (это нормально), либо его держит другой процесс.`);
@@ -1123,7 +1126,7 @@ server.on("error", (err) => {
   }
   throw err;
 });
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`TALLY API  http://localhost:${PORT} (только localhost)`);
+server.listen(PORT, HOST, () => {
+  console.log(`TALLY API  http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}${HOST === "0.0.0.0" ? " (внешний хостинг, 0.0.0.0)" : " (только localhost)"}`);
   console.log(`model: ${MODEL}`);
 });
