@@ -358,3 +358,38 @@ sup {
   --color-greend: #e0628f;
   --color-greenl: #ffe4ef;
 }
+/* ============================================================================
+   ТЁМНАЯ ТЕМА (по системной, prefers-color-scheme).
+   Правило одно: поверхности и текст темнеют, семантика (green/blue/gold/red
+   и темы маскотов) остаётся. bg-white перекрывается точечным правилом —
+   трогать --color-white нельзя: text-white сидит на цветных кнопках.
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #131f24;
+    --color-ink: #f1f7fb;
+    --color-muted: #8fa1ab;
+    --color-line: #37464f;
+  }
+  body { background: var(--color-bg); color: var(--color-ink); }
+  .bg-white { background-color: #1b2b31; }
+  .btn3d-white { background-color: #1b2b31; color: var(--color-ink); }
+  .btn3d-white:hover { background-color: #22343c; }
+  /* светлые пастельные подложки → тёмные тонированные */
+  .bg-greenl { background-color: #16323c; }
+  .text-greend { color: var(--color-green); }
+  .hover\:bg-black\/\[0\.04\]:hover { background-color: rgba(255, 255, 255, 0.06); }
+  .bg-\[\#fafafa\] { background-color: #22343c; }
+  .bg-\[\#f7f7f7\] { background-color: #22343c; }
+  .bg-\[\#ececec\] { background-color: #2a3b44; }
+  .border-\[\#dcdcdc\] { border-color: var(--color-line); }
+  .text-\[\#c2c2c2\] { color: #6b7f8a; }
+  .text-\[\#cfcfcf\] { color: #5c6f79; }
+  .text-\[\#d4d4d4\] { color: #5c6f79; }
+  .text-\[\#afafaf\] { color: #8fa1ab; }
+  .bg-\[\#d7ffb8\] { background-color: #1f4d1f; }
+  .bg-\[\#ffdfe0\] { background-color: #4d1f24; }
+  .bg-gold\/15 { background-color: rgba(255, 200, 0, 0.12); }
+  .bg-gold\/25 { background-color: rgba(255, 200, 0, 0.18); }
+  .bg-blue\/10 { background-color: rgba(28, 176, 246, 0.12); }
+}

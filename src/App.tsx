@@ -938,7 +938,7 @@ function Weg({
   }, []);
 
   return (
-    <main className="mx-auto flex max-w-[430px] flex-col px-4 pt-4 lg:px-0">
+    <main className="mx-auto flex max-w-[430px] flex-col px-4 pt-4 lg:max-w-[600px] lg:px-0">
       {/* на телефоне сверху — только серия и цель дня (канон: один экран —
           одна цель); смена маскота — украшение, уезжает под дерево */}
       <div className="mb-4 lg:hidden">
@@ -1027,7 +1027,7 @@ function Weg({
               type="button"
               onClick={() => curRef.current?.scrollIntoView({ block: "center", behavior: "smooth" })}
               aria-label="Zum aktuellen Knoten"
-              className="pointer-events-auto grid h-12 w-12 place-items-center rounded-full border-2 border-line bg-white shadow-[0_4px_0_#e5e5e5] transition-transform active:translate-y-[3px] active:shadow-none"
+              className="pointer-events-auto grid h-12 w-12 place-items-center rounded-full border-2 border-line bg-white shadow-[0_4px_0_var(--color-line)] transition-transform active:translate-y-[3px] active:shadow-none"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 19V5M5 12l7-7 7 7" />
@@ -1122,8 +1122,8 @@ function Node({
           cur && "bg-green text-white shadow-[0_4px_0_var(--color-greend)]",
           !cur && st === "mastered" && "bg-gold text-white shadow-[0_4px_0_#e0a800]",
           !cur && st === "review" && "bg-blue text-white shadow-[0_4px_0_#1899d6]",
-          !cur && st === "open" && "border-2 border-green bg-white text-green shadow-[0_4px_0_#e5e5e5]",
-          st === "locked" && "border-2 border-[#dcdcdc] bg-[#ececec] shadow-[0_4px_0_#dfdfdf]",
+          !cur && st === "open" && "border-2 border-green bg-white text-green shadow-[0_4px_0_var(--color-line)]",
+          st === "locked" && "border-2 border-[#dcdcdc] bg-[#ececec] shadow-[0_4px_0_var(--color-line)]",
           st === "notrainer" &&
             (combo
               ? "border-2 border-dashed border-gold bg-transparent"
