@@ -247,7 +247,14 @@ export default function App() {
 
       {subject === "mathe" ? (
         <div className="mx-auto flex w-full max-w-[1160px] items-start gap-8 px-4 lg:px-8">
-          <div className="min-w-0 flex-1 lg:max-w-[540px] lg:shrink-0">
+          <div className={cn(
+            "min-w-0 flex-1",
+            /* центр есть только на Weg (там правая панель); Prüfung и
+               Programm без панели центрируются, чтобы не липнуть к сайдбару */
+            matheView === "weg" && view === "weg"
+              ? "lg:max-w-[540px] lg:shrink-0"
+              : "lg:max-w-[620px] lg:mx-auto",
+          )}>
             <div className="px-0 lg:hidden">
               <SubBar
                 items={[
